@@ -3,21 +3,21 @@ import 'package:karate_club_app/src/models/member.dart';
 class MembersRepository {
   final List<Member> _mockMembers = [
     Member(
-      id: '1',
+      id: 1,
       name: 'John Doe',
       beltColor: 'Black',
       age: 25,
       joinDate: DateTime(2022, 1, 15),
     ),
     Member(
-      id: '2',
+      id: 2,
       name: 'Jane Smith',
       beltColor: 'Brown',
       age: 18,
       joinDate: DateTime(2023, 3, 10),
     ),
     Member(
-      id: '3',
+      id: 3,
       name: 'Mike Johnson',
       beltColor: 'Blue',
       age: 30,
@@ -55,7 +55,7 @@ class MembersRepository {
     }
   }
 
-  Future<void> deleteMember(String memberId) async {
+  Future<void> deleteMember(int memberId) async {
     await Future.delayed(const Duration(milliseconds: 300));
     _mockMembers.removeWhere((member) => member.id == memberId);
   }

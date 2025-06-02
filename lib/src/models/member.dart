@@ -1,5 +1,5 @@
 class Member {
-  final String id;
+  final int id;
   final String name;
   final String beltColor;
   final int age;
@@ -13,8 +13,10 @@ class Member {
     required this.joinDate,
   });
 
+  get isPresentToday => null;
+
   Member copyWith({
-    String? id,
+    int? id,
     String? name,
     String? beltColor,
     int? age,

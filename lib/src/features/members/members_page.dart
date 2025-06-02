@@ -79,7 +79,7 @@ class MembersPage extends StatelessWidget {
           TextButton(
             onPressed: () {
               final newMember = Member(
-                id: DateTime.now().millisecondsSinceEpoch.toString(),
+                id: DateTime.now().millisecondsSinceEpoch,
                 name: nameController.text,
                 beltColor: beltController.text,
                 age: int.tryParse(ageController.text) ?? 0,

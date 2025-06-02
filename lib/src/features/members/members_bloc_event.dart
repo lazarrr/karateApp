@@ -15,6 +15,6 @@ class UpdateMember extends MembersEvent {
 }
 
 class DeleteMember extends MembersEvent {
-  final String memberId;
+  final int memberId;
   DeleteMember(this.memberId);
 }
