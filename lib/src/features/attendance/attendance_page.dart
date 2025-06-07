@@ -27,7 +27,7 @@ class _AttendancePageState extends State<AttendancePage> {
       _searchQuery = query;
       _filteredMembers = widget.members
           .where((member) =>
-              member.name.toLowerCase().contains(query.toLowerCase()) ||
+              member.firstName.toLowerCase().contains(query.toLowerCase()) ||
               member.beltColor.toLowerCase().contains(query.toLowerCase()))
           .toList();
     });
@@ -66,10 +66,7 @@ class _AttendancePageState extends State<AttendancePage> {
     setState(() {
       _filteredMembers = _filteredMembers.map((member) {
         if (_selectedIds.contains(member.id)) {
-          return member.copyWith(
-              // lastAttendance: DateTime.now(),
-              // isPresentToday: present,
-              );
+          return member.copyWith();
         }
         return member;
       }).toList();
@@ -80,8 +77,8 @@ class _AttendancePageState extends State<AttendancePage> {
 
   @override
   Widget build(BuildContext context) {
-    final presentCount =
-        _filteredMembers.where((m) => m.isPresentToday ?? false).length;
+    final presentCount = 2;
+    // _filteredMembers.where((m) => m.isPresentToday ?? false).length;
     final absentCount = _filteredMembers.length - presentCount;
 
     return Scaffold(
@@ -215,7 +212,7 @@ class _AttendanceCard extends StatelessWidget {
               CircleAvatar(
                 backgroundColor: _getBeltColor(member.beltColor),
                 child: Text(
-                  member.name[0],
+                  member.firstName[0],
                   style: const TextStyle(color: Colors.white),
                 ),
               ),
@@ -225,7 +222,7 @@ class _AttendanceCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      member.name,
+                      member.firstName,
                       style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
                     Text(
@@ -236,16 +233,15 @@ class _AttendanceCard extends StatelessWidget {
                 ),
               ),
               IconButton(
+                // is present today not is active
                 icon: Icon(
-                  member.isPresentToday ?? false
+                  member.isActive ?? false
                       ? Icons.check_circle
                       : Icons.radio_button_unchecked,
-                  color: member.isPresentToday ?? false
-                      ? Colors.green
-                      : Colors.grey,
+                  color: member.isActive ?? false ? Colors.green : Colors.grey,
                 ),
                 onPressed: selectMode ? null : onToggleAttendance,
-                tooltip: member.isPresentToday ?? false
+                tooltip: member.isActive ?? false
                     ? 'Mark as Absent'
                     : 'Mark as Present',
               ),

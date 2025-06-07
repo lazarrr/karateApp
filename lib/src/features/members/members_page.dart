@@ -80,12 +80,13 @@ class MembersPage extends StatelessWidget {
             onPressed: () {
               final newMember = Member(
                 id: DateTime.now().millisecondsSinceEpoch,
-                name: nameController.text,
+                firstName: nameController.text,
                 beltColor: beltController.text,
-                age: int.tryParse(ageController.text) ?? 0,
+                lastName: "",
+                dateOfBirth: DateTime.now(),
                 joinDate: DateTime.now(),
               );
-              // context.read<MembersBloc>().add(AddMember(newMember));
+              context.read<MembersBloc>().add(AddMember(newMember));
               Navigator.pop(context);
             },
             child: const Text('Add'),
@@ -112,9 +113,9 @@ class MembersList extends StatelessWidget {
           child: ListTile(
             leading: CircleAvatar(
               backgroundColor: _getBeltColor(member.beltColor),
-              child: Text(member.name[0]),
+              child: Text(member.firstName[0]),
             ),
-            title: Text(member.name),
+            title: Text(member.firstName),
             subtitle: Text('${member.beltColor} belt - Age: ${member.age}'),
             trailing: Row(
               mainAxisSize: MainAxisSize.min,
@@ -158,7 +159,7 @@ class MembersList extends StatelessWidget {
   }
 
   void _showEditMemberDialog(BuildContext context, Member member) {
-    final nameController = TextEditingController(text: member.name);
+    final nameController = TextEditingController(text: member.firstName);
     final beltController = TextEditingController(text: member.beltColor);
     final ageController = TextEditingController(text: member.age.toString());
 
@@ -275,7 +276,7 @@ class MemberDetailPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(member.name)),
+      appBar: AppBar(title: Text(member.firstName)),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(

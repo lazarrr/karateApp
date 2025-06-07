@@ -4,7 +4,7 @@ import 'package:karate_club_app/src/features/members/members_bloc_state.dart';
 import 'package:karate_club_app/src/features/members/members_repository.dart';
 
 class MembersBloc extends Bloc<MembersEvent, MembersState> {
-  final MembersRepository repository;
+  final MemberRepository repository;
 
   MembersBloc(this.repository) : super(MembersInitial()) {
     on<LoadMembers>(_onLoadMembers);
@@ -31,7 +31,7 @@ class MembersBloc extends Bloc<MembersEvent, MembersState> {
     Emitter<MembersState> emit,
   ) async {
     try {
-      await repository.addMember(event.member);
+      await repository.insertMember(event.member);
       final members = await repository.getAllMembers();
       emit(MembersLoaded(members));
     } catch (e) {

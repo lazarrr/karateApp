@@ -1,72 +1,79 @@
+import 'package:karate_club_app/src/models/db/database_helper.dart';
 import 'package:karate_club_app/src/models/member.dart';
 
-class MembersRepository {
-  final List<Member> _mockMembers = [
-    Member(
-      id: 1,
-      name: 'John Doe',
-      beltColor: 'Black',
-      age: 25,
-      joinDate: DateTime(2022, 1, 15),
-    ),
-    Member(
-      id: 2,
-      name: 'Jane Smith',
-      beltColor: 'Brown',
-      age: 18,
-      joinDate: DateTime(2023, 3, 10),
-    ),
-    Member(
-      id: 3,
-      name: 'Mike Johnson',
-      beltColor: 'Blue',
-      age: 30,
-      joinDate: DateTime(2021, 11, 5),
-    ),
-  ];
+class MemberRepository {
+  final DatabaseHelper dbHelper;
 
-  Future<List<Member>> getMembers({
-    int page = 1,
-    int limit = 10,
-    String? beltColor,
-    bool? activeOnly,
-    bool? paymentDue,
-  }) {
-    // TODO: implement getMembers
-    throw UnimplementedError();
+  MemberRepository(this.dbHelper);
+
+  // Create a new member
+  Future<int> insertMember(Member member) async {
+    final db = await dbHelper.database;
+    return await db.insert('members', member.toMap());
   }
 
+  // Get all members
   Future<List<Member>> getAllMembers() async {
-    // Simulate network/database delay
-    await Future.delayed(const Duration(milliseconds: 500));
-    return _mockMembers.toList();
+    final db = await dbHelper.database;
+    final List<Map<String, dynamic>> maps = await db.query('members');
+    return List.generate(maps.length, (i) => Member.fromMap(maps[i]));
   }
 
-  Future<void> addMember(Member member) async {
-    await Future.delayed(const Duration(milliseconds: 300));
-    _mockMembers.add(member);
-  }
-
-  Future<void> updateMember(Member updatedMember) async {
-    await Future.delayed(const Duration(milliseconds: 300));
-    final index = _mockMembers.indexWhere((m) => m.id == updatedMember.id);
-    if (index != -1) {
-      _mockMembers[index] = updatedMember;
+  // Get a member by ID
+  Future<Member?> getMemberById(int id) async {
+    final db = await dbHelper.database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'members',
+      where: 'id = ?',
+      whereArgs: [id],
+      limit: 1,
+    );
+    if (maps.isNotEmpty) {
+      return Member.fromMap(maps.first);
     }
+    return null;
   }
 
-  Future<void> deleteMember(int memberId) async {
-    await Future.delayed(const Duration(milliseconds: 300));
-    _mockMembers.removeWhere((member) => member.id == memberId);
+  // Update a member
+  Future<int> updateMember(Member member) async {
+    final db = await dbHelper.database;
+    return await db.update(
+      'members',
+      member.toMap(),
+      where: 'id = ?',
+      whereArgs: [member.id],
+    );
   }
 
-  // Optional: For search functionality
+  // Delete a member
+  Future<int> deleteMember(int id) async {
+    final db = await dbHelper.database;
+    return await db.delete(
+      'members',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+  // Search members by name
   Future<List<Member>> searchMembers(String query) async {
-    await Future.delayed(const Duration(milliseconds: 200));
-    return _mockMembers
-        .where((member) =>
-            member.name.toLowerCase().contains(query.toLowerCase()) ||
-            member.beltColor.toLowerCase().contains(query.toLowerCase()))
-        .toList();
+    final db = await dbHelper.database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'members',
+      where: 'first_name LIKE ? OR last_name LIKE ?',
+      whereArgs: ['%$query%', '%$query%'],
+    );
+    return List.generate(maps.length, (i) => Member.fromMap(maps[i]));
+  }
+
+  // Filter members by belt color
+  Future<List<Member>> filterByBelt(String beltColor) async {
+    final db = await dbHelper.database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'members',
+      where: 'belt_color = ?',
+      whereArgs: [beltColor],
+    );
+    return List.generate(maps.length, (i) => Member.fromMap(maps[i]));
   }
 }
