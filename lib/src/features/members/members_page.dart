@@ -11,20 +11,7 @@ class MembersPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Members'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.search),
-            onPressed: () {
-              showSearch(
-                context: context,
-                delegate: MemberSearchDelegate(),
-              );
-            },
-          ),
-        ],
-      ),
+      appBar: AppBar(title: const Text('Members')),
       body: BlocBuilder<MembersBloc, MembersState>(
         builder: (context, state) {
           if (state is MembersLoading) {
@@ -46,6 +33,7 @@ class MembersPage extends StatelessWidget {
 
   void _showAddMemberDialog(BuildContext context) {
     final nameController = TextEditingController();
+    final lastNameController = TextEditingController();
     final beltController = TextEditingController();
     final ageController = TextEditingController();
 
@@ -58,16 +46,38 @@ class MembersPage extends StatelessWidget {
           children: [
             TextField(
               controller: nameController,
-              decoration: const InputDecoration(labelText: 'Full Name'),
+              decoration: const InputDecoration(labelText: 'First Name'),
+            ),
+            TextField(
+              controller: lastNameController,
+              decoration: const InputDecoration(labelText: 'Last Name'),
             ),
             TextField(
               controller: beltController,
               decoration: const InputDecoration(labelText: 'Belt Color'),
             ),
-            TextField(
-              controller: ageController,
-              decoration: const InputDecoration(labelText: 'Age'),
-              keyboardType: TextInputType.number,
+            GestureDetector(
+              onTap: () async {
+                final pickedDate = await showDatePicker(
+                  context: context,
+                  initialDate:
+                      DateTime.now().subtract(const Duration(days: 365 * 18)),
+                  firstDate: DateTime(1900),
+                  lastDate: DateTime.now(),
+                );
+                if (pickedDate != null) {
+                  ageController.text = "${pickedDate.toLocal()}".split(' ')[0];
+                }
+              },
+              child: AbsorbPointer(
+                child: TextField(
+                  controller: ageController,
+                  decoration: const InputDecoration(
+                    labelText: 'Date of Birth',
+                    hintText: 'Select date of birth',
+                  ),
+                ),
+              ),
             ),
           ],
         ),
@@ -79,13 +89,11 @@ class MembersPage extends StatelessWidget {
           TextButton(
             onPressed: () {
               final newMember = Member(
-                id: DateTime.now().millisecondsSinceEpoch,
-                firstName: nameController.text,
-                beltColor: beltController.text,
-                lastName: "",
-                dateOfBirth: DateTime.now(),
-                joinDate: DateTime.now(),
-              );
+                  id: DateTime.now().millisecondsSinceEpoch,
+                  firstName: nameController.text,
+                  beltColor: beltController.text,
+                  lastName: lastNameController.text,
+                  dateOfBirth: DateTime.now());
               context.read<MembersBloc>().add(AddMember(newMember));
               Navigator.pop(context);
             },
@@ -97,43 +105,102 @@ class MembersPage extends StatelessWidget {
   }
 }
 
-class MembersList extends StatelessWidget {
+class MembersList extends StatefulWidget {
   final List<Member> members;
 
-  const MembersList({super.key, required this.members});
+  const MembersList({Key? key, required this.members}) : super(key: key);
+
+  @override
+  State<MembersList> createState() => _MembersListState();
+}
+
+class _MembersListState extends State<MembersList> {
+  late List<Member> _filteredMembers;
+
+  @override
+  void initState() {
+    super.initState();
+    _filteredMembers = widget.members;
+  }
+
+  @override
+  void didUpdateWidget(covariant MembersList oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.members != widget.members) {
+      _filteredMembers = widget.members;
+    }
+  }
+
+  void _filterMembers(String query) {
+    setState(() {
+      _filteredMembers = widget.members
+          .where((member) =>
+              member.firstName.toLowerCase().contains(query.toLowerCase()) ||
+              member.lastName.toLowerCase().contains(query.toLowerCase()) ||
+              member.beltColor.toLowerCase().contains(query.toLowerCase()))
+          .toList();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-      itemCount: members.length,
-      itemBuilder: (context, index) {
-        final member = members[index];
-        return Card(
-          margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-          child: ListTile(
-            leading: CircleAvatar(
-              backgroundColor: _getBeltColor(member.beltColor),
-              child: Text(member.firstName[0]),
-            ),
-            title: Text(member.firstName),
-            subtitle: Text('${member.beltColor} belt - Age: ${member.age}'),
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.edit, color: Colors.blue),
-                  onPressed: () => _showEditMemberDialog(context, member),
+    return SafeArea(
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: TextField(
+              decoration: InputDecoration(
+                hintText: 'Search by name or belt...',
+                prefixIcon: const Icon(Icons.search),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
                 ),
-                IconButton(
-                  icon: const Icon(Icons.delete, color: Colors.red),
-                  onPressed: () =>
-                      context.read<MembersBloc>().add(DeleteMember(member.id)),
-                ),
-              ],
+              ),
+              onChanged: _filterMembers,
             ),
           ),
-        );
-      },
+          Expanded(
+            child: ListView.builder(
+              itemCount: _filteredMembers.length,
+              itemBuilder: (context, index) {
+                final member = _filteredMembers[index];
+                return Card(
+                  margin:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  child: ListTile(
+                    leading: CircleAvatar(
+                      backgroundColor: _getBeltColor(member.beltColor),
+                      child: Text(member.firstName.isNotEmpty
+                          ? member.firstName[0]
+                          : ''),
+                    ),
+                    title: Text("${member.firstName} ${member.lastName}"),
+                    subtitle:
+                        Text('${member.beltColor} belt - Age: ${member.age}'),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.edit, color: Colors.blue),
+                          onPressed: () =>
+                              _showEditMemberDialog(context, member),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.delete, color: Colors.red),
+                          onPressed: () => context
+                              .read<MembersBloc>()
+                              .add(DeleteMember(member.id)),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -159,9 +226,11 @@ class MembersList extends StatelessWidget {
   }
 
   void _showEditMemberDialog(BuildContext context, Member member) {
-    final nameController = TextEditingController(text: member.firstName);
+    final firstNameController = TextEditingController(text: member.firstName);
+    final lastNameController = TextEditingController(text: member.lastName);
     final beltController = TextEditingController(text: member.beltColor);
-    final ageController = TextEditingController(text: member.age.toString());
+    final ageController =
+        TextEditingController(text: member.dateOfBirth.toString());
 
     showDialog(
       context: context,
@@ -171,17 +240,39 @@ class MembersList extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             TextField(
-              controller: nameController,
-              decoration: const InputDecoration(labelText: 'Full Name'),
+              controller: firstNameController,
+              decoration: const InputDecoration(labelText: 'First Name'),
+            ),
+            TextField(
+              controller: lastNameController,
+              decoration: const InputDecoration(labelText: 'Last Name'),
             ),
             TextField(
               controller: beltController,
               decoration: const InputDecoration(labelText: 'Belt Color'),
             ),
-            TextField(
-              controller: ageController,
-              decoration: const InputDecoration(labelText: 'Age'),
-              keyboardType: TextInputType.number,
+            GestureDetector(
+              onTap: () async {
+                final pickedDate = await showDatePicker(
+                  context: context,
+                  initialDate:
+                      DateTime.now().subtract(const Duration(days: 365 * 18)),
+                  firstDate: DateTime(1900),
+                  lastDate: DateTime.now(),
+                );
+                if (pickedDate != null) {
+                  ageController.text = "${pickedDate.toLocal()}".split(' ')[0];
+                }
+              },
+              child: AbsorbPointer(
+                child: TextField(
+                  controller: ageController,
+                  decoration: const InputDecoration(
+                    labelText: 'Date of Birth',
+                    hintText: 'Select date of birth',
+                  ),
+                ),
+              ),
             ),
           ],
         ),
@@ -193,9 +284,10 @@ class MembersList extends StatelessWidget {
           TextButton(
             onPressed: () {
               final updatedMember = member.copyWith(
-                name: nameController.text,
-                beltColor: beltController.text,
-                age: int.tryParse(ageController.text) ?? member.age,
+                firstName: firstNameController.text,
+                lastName: lastNameController.text,
+                beltColor: beltController.text, dateOfBirth: DateTime.now(),
+                // You may want to update dateOfBirth instead of age
               );
               context.read<MembersBloc>().add(UpdateMember(updatedMember));
               Navigator.pop(context);
@@ -235,7 +327,8 @@ class MemberSearchDelegate extends SearchDelegate {
   Widget buildResults(BuildContext context) {
     final members = context.read<MembersBloc>().state.members;
     final results = members.where((member) =>
-        member.name.toLowerCase().contains(query.toLowerCase()) ||
+        member.firstName.toLowerCase().contains(query.toLowerCase()) ||
+        member.lastName.toLowerCase().contains(query.toLowerCase()) ||
         member.beltColor.toLowerCase().contains(query.toLowerCase()));
 
     return ListView.builder(
@@ -243,7 +336,7 @@ class MemberSearchDelegate extends SearchDelegate {
       itemBuilder: (context, index) {
         final member = results.elementAt(index);
         return ListTile(
-          title: Text(member.name),
+          title: Text(member.firstName),
           subtitle: Text(member.beltColor),
           onTap: () {
             close(context, null);
@@ -284,9 +377,7 @@ class MemberDetailPage extends StatelessWidget {
           children: [
             Text('Belt Color: ${member.beltColor}',
                 style: TextStyle(fontSize: 18)),
-            Text('Age: ${member.age}', style: TextStyle(fontSize: 18)),
-            Text('Member since: ${member.joinDate.toString().split(' ')[0]}',
-                style: TextStyle(fontSize: 18)),
+            Text('Age: ${member.age}', style: TextStyle(fontSize: 18))
             // Add more member details as needed
           ],
         ),

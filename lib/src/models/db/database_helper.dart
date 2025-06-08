@@ -14,6 +14,7 @@ class DatabaseHelper {
   Future<Database> get database async => _database ??= await _initDatabase();
 
   Future<Database> _initDatabase() async {
+    await deleteDatabase(join(await getDatabasesPath(), _databaseName));
     final databasesPath = await getDatabasesPath();
     final path = join(databasesPath, _databaseName);
 
@@ -31,12 +32,8 @@ class DatabaseHelper {
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         first_name TEXT NOT NULL,
         last_name TEXT NOT NULL,
-        date_of_birth TEXT NOT NULL,
         belt_color TEXT NOT NULL,
-        join_date TEXT NOT NULL,
-        is_active INTEGER DEFAULT 1,
-        last_payment_date TEXT,
-        created_at TEXT DEFAULT CURRENT_TIMESTAMP
+        date_of_birth TEXT NOT NULL
       )
     ''');
 

@@ -12,7 +12,6 @@ class AttendancePage extends StatefulWidget {
 
 class _AttendancePageState extends State<AttendancePage> {
   List<Member> _filteredMembers = [];
-  String _searchQuery = '';
   bool _selectMode = false;
   final List<int> _selectedIds = [];
 
@@ -24,7 +23,6 @@ class _AttendancePageState extends State<AttendancePage> {
 
   void _filterMembers(String query) {
     setState(() {
-      _searchQuery = query;
       _filteredMembers = widget.members
           .where((member) =>
               member.firstName.toLowerCase().contains(query.toLowerCase()) ||
@@ -66,7 +64,7 @@ class _AttendancePageState extends State<AttendancePage> {
     setState(() {
       _filteredMembers = _filteredMembers.map((member) {
         if (_selectedIds.contains(member.id)) {
-          return member.copyWith();
+          return member.copyWith(dateOfBirth: DateTime.now());
         }
         return member;
       }).toList();
@@ -234,16 +232,14 @@ class _AttendanceCard extends StatelessWidget {
               ),
               IconButton(
                 // is present today not is active
-                icon: Icon(
-                  member.isActive ?? false
+                icon: const Icon(
+                  1 == 1 ?? false
                       ? Icons.check_circle
                       : Icons.radio_button_unchecked,
-                  color: member.isActive ?? false ? Colors.green : Colors.grey,
+                  color: 1 == 1 ?? false ? Colors.green : Colors.grey,
                 ),
                 onPressed: selectMode ? null : onToggleAttendance,
-                tooltip: member.isActive ?? false
-                    ? 'Mark as Absent'
-                    : 'Mark as Present',
+                tooltip: 1 == 1 ?? false ? 'Mark as Absent' : 'Mark as Present',
               ),
             ],
           ),

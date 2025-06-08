@@ -22,7 +22,6 @@ class _MainNavigationState extends State<MainNavigation> {
           lastName: 'Doe',
           beltColor: 'Black',
           dateOfBirth: DateTime(1998, 5, 20),
-          joinDate: DateTime.now(),
         ),
         Member(
           id: 2,
@@ -30,7 +29,6 @@ class _MainNavigationState extends State<MainNavigation> {
           lastName: 'Smith',
           beltColor: 'Blue',
           dateOfBirth: DateTime(2001, 8, 15),
-          joinDate: DateTime.now(),
         ),
         Member(
           id: 3,
@@ -38,7 +36,6 @@ class _MainNavigationState extends State<MainNavigation> {
           lastName: 'Johnson',
           beltColor: 'Red',
           dateOfBirth: DateTime(1993, 3, 10),
-          joinDate: DateTime.now(),
         ),
       ],
     ),
