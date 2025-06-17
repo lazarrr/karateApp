@@ -11,7 +11,15 @@ class MembersPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Members')),
+      appBar: AppBar(
+        title: const Text('Članovi'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.add),
+            onPressed: () => _showAddMemberDialog(context),
+          ),
+        ],
+      ),
       body: BlocBuilder<MembersBloc, MembersState>(
         builder: (context, state) {
           if (state is MembersLoading) {
@@ -21,13 +29,13 @@ class MembersPage extends StatelessWidget {
           } else if (state is MembersError) {
             return Center(child: Text(state.message));
           }
-          return const Center(child: Text('No members found'));
+          return const Center(child: Text('Nije pronađen nijedan član'));
         },
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _showAddMemberDialog(context),
-        child: const Icon(Icons.add),
-      ),
+      // floatingActionButton: FloatingActionButton(
+      //   onPressed: () => _showAddMemberDialog(context),
+      //   child: const Icon(Icons.add),
+      // ),
     );
   }
 
@@ -40,21 +48,17 @@ class MembersPage extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Add New Member'),
+        title: const Text('Dodaj novog člana'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             TextField(
               controller: nameController,
-              decoration: const InputDecoration(labelText: 'First Name'),
+              decoration: const InputDecoration(labelText: 'Ime'),
             ),
             TextField(
               controller: lastNameController,
-              decoration: const InputDecoration(labelText: 'Last Name'),
-            ),
-            TextField(
-              controller: beltController,
-              decoration: const InputDecoration(labelText: 'Belt Color'),
+              decoration: const InputDecoration(labelText: 'Prezime'),
             ),
             GestureDetector(
               onTap: () async {
@@ -62,7 +66,7 @@ class MembersPage extends StatelessWidget {
                   context: context,
                   initialDate:
                       DateTime.now().subtract(const Duration(days: 365 * 18)),
-                  firstDate: DateTime(1900),
+                  firstDate: DateTime(1950),
                   lastDate: DateTime.now(),
                 );
                 if (pickedDate != null) {
@@ -73,10 +77,73 @@ class MembersPage extends StatelessWidget {
                 child: TextField(
                   controller: ageController,
                   decoration: const InputDecoration(
-                    labelText: 'Date of Birth',
-                    hintText: 'Select date of birth',
+                    labelText: 'Dattm rođenja',
+                    hintText: 'Izaberite datum rođenja',
                   ),
                 ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('Belt Color', style: TextStyle(fontSize: 16)),
+                  Wrap(
+                    spacing: 8,
+                    children: [
+                      for (final color in [
+                        'white',
+                        'yellow',
+                        'orange',
+                        'green',
+                        'blue',
+                        'brown',
+                        'black'
+                      ])
+                        ChoiceChip(
+                          label: Text(
+                            () {
+                              switch (color) {
+                                case 'white':
+                                  return 'Bela';
+                                case 'yellow':
+                                  return 'Žuta';
+                                case 'orange':
+                                  return 'Narandžasta';
+                                case 'green':
+                                  return 'Zelena';
+                                case 'blue':
+                                  return 'Plava';
+                                case 'brown':
+                                  return 'Braon';
+                                case 'black':
+                                  return 'Crni';
+                                default:
+                                  return color[0].toUpperCase() +
+                                      color.substring(1);
+                              }
+                            }(),
+                          ),
+                          selected: beltController.text == color,
+                          selectedColor: _getBeltColor(color).withOpacity(0.7),
+                          backgroundColor: Colors.grey[200],
+                          labelStyle: TextStyle(
+                            color: beltController.text == color
+                                ? Colors.white
+                                : Colors.black,
+                          ),
+                          onSelected: (selected) {
+                            if (selected) {
+                              beltController.text = color;
+                              // Force rebuild to update selection
+                              (context as Element).markNeedsBuild();
+                            }
+                          },
+                        ),
+                    ],
+                  ),
+                ],
               ),
             ),
           ],
@@ -84,7 +151,7 @@ class MembersPage extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: const Text('Odustani'),
           ),
           TextButton(
             onPressed: () {
@@ -97,7 +164,7 @@ class MembersPage extends StatelessWidget {
               context.read<MembersBloc>().add(AddMember(newMember));
               Navigator.pop(context);
             },
-            child: const Text('Add'),
+            child: const Text('Dodaj'),
           ),
         ],
       ),
@@ -162,7 +229,7 @@ class _MembersListState extends State<MembersList> {
             padding: const EdgeInsets.all(8.0),
             child: TextField(
               decoration: InputDecoration(
-                hintText: 'Search by name or belt...',
+                hintText: 'Pretraži članove o imenu ili boji pojasa...',
                 prefixIcon: const Icon(Icons.search),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
@@ -184,13 +251,9 @@ class _MembersListState extends State<MembersList> {
                       const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   child: ListTile(
                     leading: CircleAvatar(
-                      backgroundColor: _getBeltColor(member.beltColor),
-                      child: Text(member.firstName.isNotEmpty
-                          ? member.firstName[0]
-                          : ''),
-                    ),
+                        backgroundColor: _getBeltColor(member.beltColor)),
                     title: Text("${member.firstName} ${member.lastName}"),
-                    subtitle: Text('${member.beltColor} belt'),
+                    subtitle: Text('${member.beltColor} pojas'),
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
@@ -200,11 +263,32 @@ class _MembersListState extends State<MembersList> {
                               _showEditMemberDialog(context, member),
                         ),
                         IconButton(
-                          icon: const Icon(Icons.delete, color: Colors.red),
-                          onPressed: () => context
-                              .read<MembersBloc>()
-                              .add(DeleteMember(member.id)),
-                        ),
+                            icon: const Icon(Icons.delete, color: Colors.red),
+                            onPressed: () => showDialog(
+                                  context: context,
+                                  builder: (context) => AlertDialog(
+                                    title: const Text('Da li ste sigurni?'),
+                                    content: const Text(
+                                        'Želite li da obrišete ovog člana?'),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () => Navigator.pop(context),
+                                        child: const Text('Odustani'),
+                                      ),
+                                      TextButton(
+                                        onPressed: () {
+                                          Navigator.pop(context);
+                                          context
+                                              .read<MembersBloc>()
+                                              .add(DeleteMember(member.id));
+                                        },
+                                        child: const Text('Obriši',
+                                            style:
+                                                TextStyle(color: Colors.red)),
+                                      ),
+                                    ],
+                                  ),
+                                )),
                       ],
                     ),
                   ),
@@ -221,15 +305,15 @@ class _MembersListState extends State<MembersList> {
                   onPressed: _currentPage > 0
                       ? () => setState(() => _currentPage--)
                       : null,
-                  child: const Text('Previous'),
+                  child: const Text('Prethodna'),
                 ),
-                Text('Page ${_currentPage + 1}'),
+                Text('Strana ${_currentPage + 1}'),
                 TextButton(
                   onPressed: (_currentPage + 1) * _membersPerPage <
                           _filteredMembers.length
                       ? () => setState(() => _currentPage++)
                       : null,
-                  child: const Text('Next'),
+                  child: const Text('Sledeća'),
                 ),
               ],
             ),
@@ -277,15 +361,11 @@ void _showEditMemberDialog(BuildContext context, Member member) {
         children: [
           TextField(
             controller: firstNameController,
-            decoration: const InputDecoration(labelText: 'First Name'),
+            decoration: const InputDecoration(labelText: 'Ime'),
           ),
           TextField(
             controller: lastNameController,
-            decoration: const InputDecoration(labelText: 'Last Name'),
-          ),
-          TextField(
-            controller: beltController,
-            decoration: const InputDecoration(labelText: 'Belt Color'),
+            decoration: const InputDecoration(labelText: 'Prezime'),
           ),
           GestureDetector(
             onTap: () async {
@@ -293,7 +373,7 @@ void _showEditMemberDialog(BuildContext context, Member member) {
                 context: context,
                 initialDate:
                     DateTime.now().subtract(const Duration(days: 365 * 18)),
-                firstDate: DateTime(1900),
+                firstDate: DateTime(1950),
                 lastDate: DateTime.now(),
               );
               if (pickedDate != null) {
@@ -304,10 +384,71 @@ void _showEditMemberDialog(BuildContext context, Member member) {
               child: TextField(
                 controller: ageController,
                 decoration: const InputDecoration(
-                  labelText: 'Date of Birth',
-                  hintText: 'Select date of birth',
+                  labelText: 'Datum rođenja',
+                  hintText: 'Izaberite datum rođenja',
                 ),
               ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('Boja pojasa', style: TextStyle(fontSize: 16)),
+                Wrap(
+                  spacing: 8,
+                  children: [
+                    for (final color in [
+                      'white',
+                      'yellow',
+                      'orange',
+                      'green',
+                      'blue',
+                      'brown',
+                      'black'
+                    ])
+                      ChoiceChip(
+                        label: Text(() {
+                          switch (color) {
+                            case 'white':
+                              return 'Bela';
+                            case 'yellow':
+                              return 'Žuta';
+                            case 'orange':
+                              return 'Narandžasta';
+                            case 'green':
+                              return 'Zelena';
+                            case 'blue':
+                              return 'Plava';
+                            case 'brown':
+                              return 'Braon';
+                            case 'black':
+                              return 'Crni';
+                            default:
+                              return color[0].toUpperCase() +
+                                  color.substring(1);
+                          }
+                        }()),
+                        selected: beltController.text == color,
+                        selectedColor: _getBeltColor(color).withOpacity(0.7),
+                        backgroundColor: Colors.grey[200],
+                        labelStyle: TextStyle(
+                          color: beltController.text == color
+                              ? Colors.white
+                              : Colors.black,
+                        ),
+                        onSelected: (selected) {
+                          if (selected) {
+                            beltController.text = color;
+                            // Force rebuild to update selection
+                            (context as Element).markNeedsBuild();
+                          }
+                        },
+                      ),
+                  ],
+                ),
+              ],
             ),
           ),
         ],
@@ -315,7 +456,7 @@ void _showEditMemberDialog(BuildContext context, Member member) {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('Cancel'),
+          child: const Text('Odustani'),
         ),
         TextButton(
           onPressed: () {
@@ -328,7 +469,7 @@ void _showEditMemberDialog(BuildContext context, Member member) {
             context.read<MembersBloc>().add(UpdateMember(updatedMember));
             Navigator.pop(context);
           },
-          child: const Text('Save'),
+          child: const Text('Sačuvaj'),
         ),
       ],
     ),
