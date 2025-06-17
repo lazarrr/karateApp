@@ -6,37 +6,42 @@ import 'package:karate_club_app/src/features/members/members_bloc_state.dart';
 import 'package:karate_club_app/src/models/member.dart';
 
 class MembersPage extends StatelessWidget {
-  const MembersPage({Key? key}) : super(key: key);
+  const MembersPage({super.key});
+
+  static const beltColors = [
+    'white',
+    'yellow',
+    'orange',
+    'green',
+    'blue',
+    'brown',
+    'black'
+  ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Članovi'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.add),
-            onPressed: () => _showAddMemberDialog(context),
-          ),
-        ],
-      ),
-      body: BlocBuilder<MembersBloc, MembersState>(
-        builder: (context, state) {
-          if (state is MembersLoading) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (state is MembersLoaded) {
-            return MembersList(members: state.members);
-          } else if (state is MembersError) {
-            return Center(child: Text(state.message));
-          }
-          return const Center(child: Text('Nije pronađen nijedan član'));
-        },
-      ),
-      // floatingActionButton: FloatingActionButton(
-      //   onPressed: () => _showAddMemberDialog(context),
-      //   child: const Icon(Icons.add),
-      // ),
-    );
+        appBar: AppBar(
+          title: const Text('Članovi'),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.add),
+              onPressed: () => _showAddMemberDialog(context),
+            ),
+          ],
+        ),
+        body: BlocBuilder<MembersBloc, MembersState>(
+          builder: (context, state) {
+            if (state is MembersLoading) {
+              return const Center(child: CircularProgressIndicator());
+            } else if (state is MembersLoaded) {
+              return MembersList(members: state.members);
+            } else if (state is MembersError) {
+              return Center(child: Text(state.message));
+            }
+            return const Center(child: Text('Nije pronađen nijedan član'));
+          },
+        ));
   }
 
   void _showAddMemberDialog(BuildContext context) {
@@ -92,15 +97,7 @@ class MembersPage extends StatelessWidget {
                   Wrap(
                     spacing: 8,
                     children: [
-                      for (final color in [
-                        'white',
-                        'yellow',
-                        'orange',
-                        'green',
-                        'blue',
-                        'brown',
-                        'black'
-                      ])
+                      for (final color in beltColors)
                         ChoiceChip(
                           label: Text(
                             () {
@@ -352,6 +349,16 @@ void _showEditMemberDialog(BuildContext context, Member member) {
   final ageController =
       TextEditingController(text: member.dateOfBirth.toString());
 
+  const beltColors = [
+    'white',
+    'yellow',
+    'orange',
+    'green',
+    'blue',
+    'brown',
+    'black'
+  ];
+
   showDialog(
     context: context,
     builder: (context) => AlertDialog(
@@ -399,15 +406,7 @@ void _showEditMemberDialog(BuildContext context, Member member) {
                 Wrap(
                   spacing: 8,
                   children: [
-                    for (final color in [
-                      'white',
-                      'yellow',
-                      'orange',
-                      'green',
-                      'blue',
-                      'brown',
-                      'black'
-                    ])
+                    for (final color in beltColors)
                       ChoiceChip(
                         label: Text(() {
                           switch (color) {
