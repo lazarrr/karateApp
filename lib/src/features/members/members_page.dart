@@ -116,6 +116,8 @@ class MembersList extends StatefulWidget {
 
 class _MembersListState extends State<MembersList> {
   late List<Member> _filteredMembers;
+  int _currentPage = 0;
+  static const int _membersPerPage = 5;
 
   @override
   void initState() {
@@ -142,6 +144,15 @@ class _MembersListState extends State<MembersList> {
     });
   }
 
+  List<Member> get _paginatedMembers {
+    final startIndex = _currentPage * _membersPerPage;
+    final endIndex = startIndex + _membersPerPage;
+    return _filteredMembers.sublist(
+      startIndex,
+      endIndex > _filteredMembers.length ? _filteredMembers.length : endIndex,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -157,14 +168,17 @@ class _MembersListState extends State<MembersList> {
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
-              onChanged: _filterMembers,
+              onChanged: (query) {
+                _filterMembers(query);
+                _currentPage = 0; // Reset to first page on new search
+              },
             ),
           ),
           Expanded(
             child: ListView.builder(
-              itemCount: _filteredMembers.length,
+              itemCount: _paginatedMembers.length,
               itemBuilder: (context, index) {
-                final member = _filteredMembers[index];
+                final member = _paginatedMembers[index];
                 return Card(
                   margin:
                       const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -176,8 +190,7 @@ class _MembersListState extends State<MembersList> {
                           : ''),
                     ),
                     title: Text("${member.firstName} ${member.lastName}"),
-                    subtitle:
-                        Text('${member.beltColor} belt - Age: ${member.age}'),
+                    subtitle: Text('${member.beltColor} belt'),
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
@@ -199,105 +212,127 @@ class _MembersListState extends State<MembersList> {
               },
             ),
           ),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                TextButton(
+                  onPressed: _currentPage > 0
+                      ? () => setState(() => _currentPage--)
+                      : null,
+                  child: const Text('Previous'),
+                ),
+                Text('Page ${_currentPage + 1}'),
+                TextButton(
+                  onPressed: (_currentPage + 1) * _membersPerPage <
+                          _filteredMembers.length
+                      ? () => setState(() => _currentPage++)
+                      : null,
+                  child: const Text('Next'),
+                ),
+              ],
+            ),
+          )
         ],
       ),
     );
   }
+}
 
-  Color _getBeltColor(String beltColor) {
-    switch (beltColor.toLowerCase()) {
-      case 'black':
-        return Colors.black;
-      case 'brown':
-        return Colors.brown;
-      case 'blue':
-        return Colors.blue;
-      case 'green':
-        return Colors.green;
-      case 'orange':
-        return Colors.orange;
-      case 'yellow':
-        return Colors.yellow;
-      case 'white':
-        return Colors.grey;
-      default:
-        return Colors.purple;
-    }
+Color _getBeltColor(String beltColor) {
+  switch (beltColor.toLowerCase()) {
+    case 'black':
+      return Colors.black;
+    case 'brown':
+      return Colors.brown;
+    case 'blue':
+      return Colors.blue;
+    case 'green':
+      return Colors.green;
+    case 'orange':
+      return Colors.orange;
+    case 'yellow':
+      return Colors.yellow;
+    case 'white':
+      return Colors.grey;
+    default:
+      return Colors.purple;
   }
+}
 
-  void _showEditMemberDialog(BuildContext context, Member member) {
-    final firstNameController = TextEditingController(text: member.firstName);
-    final lastNameController = TextEditingController(text: member.lastName);
-    final beltController = TextEditingController(text: member.beltColor);
-    final ageController =
-        TextEditingController(text: member.dateOfBirth.toString());
+void _showEditMemberDialog(BuildContext context, Member member) {
+  final firstNameController = TextEditingController(text: member.firstName);
+  final lastNameController = TextEditingController(text: member.lastName);
+  final beltController = TextEditingController(text: member.beltColor);
+  final ageController =
+      TextEditingController(text: member.dateOfBirth.toString());
 
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Edit Member'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: firstNameController,
-              decoration: const InputDecoration(labelText: 'First Name'),
-            ),
-            TextField(
-              controller: lastNameController,
-              decoration: const InputDecoration(labelText: 'Last Name'),
-            ),
-            TextField(
-              controller: beltController,
-              decoration: const InputDecoration(labelText: 'Belt Color'),
-            ),
-            GestureDetector(
-              onTap: () async {
-                final pickedDate = await showDatePicker(
-                  context: context,
-                  initialDate:
-                      DateTime.now().subtract(const Duration(days: 365 * 18)),
-                  firstDate: DateTime(1900),
-                  lastDate: DateTime.now(),
-                );
-                if (pickedDate != null) {
-                  ageController.text = "${pickedDate.toLocal()}".split(' ')[0];
-                }
-              },
-              child: AbsorbPointer(
-                child: TextField(
-                  controller: ageController,
-                  decoration: const InputDecoration(
-                    labelText: 'Date of Birth',
-                    hintText: 'Select date of birth',
-                  ),
+  showDialog(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: const Text('Edit Member'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          TextField(
+            controller: firstNameController,
+            decoration: const InputDecoration(labelText: 'First Name'),
+          ),
+          TextField(
+            controller: lastNameController,
+            decoration: const InputDecoration(labelText: 'Last Name'),
+          ),
+          TextField(
+            controller: beltController,
+            decoration: const InputDecoration(labelText: 'Belt Color'),
+          ),
+          GestureDetector(
+            onTap: () async {
+              final pickedDate = await showDatePicker(
+                context: context,
+                initialDate:
+                    DateTime.now().subtract(const Duration(days: 365 * 18)),
+                firstDate: DateTime(1900),
+                lastDate: DateTime.now(),
+              );
+              if (pickedDate != null) {
+                ageController.text = "${pickedDate.toLocal()}".split(' ')[0];
+              }
+            },
+            child: AbsorbPointer(
+              child: TextField(
+                controller: ageController,
+                decoration: const InputDecoration(
+                  labelText: 'Date of Birth',
+                  hintText: 'Select date of birth',
                 ),
               ),
             ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () {
-              final updatedMember = member.copyWith(
-                firstName: firstNameController.text,
-                lastName: lastNameController.text,
-                beltColor: beltController.text, dateOfBirth: DateTime.now(),
-                // You may want to update dateOfBirth instead of age
-              );
-              context.read<MembersBloc>().add(UpdateMember(updatedMember));
-              Navigator.pop(context);
-            },
-            child: const Text('Save'),
           ),
         ],
       ),
-    );
-  }
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Cancel'),
+        ),
+        TextButton(
+          onPressed: () {
+            final updatedMember = member.copyWith(
+              firstName: firstNameController.text,
+              lastName: lastNameController.text,
+              beltColor: beltController.text, dateOfBirth: DateTime.now(),
+              // You may want to update dateOfBirth instead of age
+            );
+            context.read<MembersBloc>().add(UpdateMember(updatedMember));
+            Navigator.pop(context);
+          },
+          child: const Text('Save'),
+        ),
+      ],
+    ),
+  );
 }
 
 class MemberSearchDelegate extends SearchDelegate {

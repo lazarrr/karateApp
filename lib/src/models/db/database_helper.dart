@@ -14,7 +14,7 @@ class DatabaseHelper {
   Future<Database> get database async => _database ??= await _initDatabase();
 
   Future<Database> _initDatabase() async {
-    await deleteDatabase(join(await getDatabasesPath(), _databaseName));
+    // await deleteDatabase(join(await getDatabasesPath(), _databaseName));
     final databasesPath = await getDatabasesPath();
     final path = join(databasesPath, _databaseName);
 
