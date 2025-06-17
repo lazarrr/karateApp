@@ -469,95 +469,9 @@ void _showEditMemberDialog(BuildContext context, Member member) {
             context.read<MembersBloc>().add(UpdateMember(updatedMember));
             Navigator.pop(context);
           },
-          child: const Text('Sačuvaj'),
+          child: const Text('Sačuvaj', style: TextStyle(color: Colors.blue)),
         ),
       ],
     ),
   );
-}
-
-class MemberSearchDelegate extends SearchDelegate {
-  @override
-  List<Widget> buildActions(BuildContext context) {
-    return [
-      IconButton(
-        icon: const Icon(Icons.clear),
-        onPressed: () {
-          query = '';
-        },
-      ),
-    ];
-  }
-
-  @override
-  Widget buildLeading(BuildContext context) {
-    return IconButton(
-      icon: const Icon(Icons.arrow_back),
-      onPressed: () {
-        close(context, null);
-      },
-    );
-  }
-
-  @override
-  Widget buildResults(BuildContext context) {
-    final members = context.read<MembersBloc>().state.members;
-    final results = members.where((member) =>
-        member.firstName.toLowerCase().contains(query.toLowerCase()) ||
-        member.lastName.toLowerCase().contains(query.toLowerCase()) ||
-        member.beltColor.toLowerCase().contains(query.toLowerCase()));
-
-    return ListView.builder(
-      itemCount: results.length,
-      itemBuilder: (context, index) {
-        final member = results.elementAt(index);
-        return ListTile(
-          title: Text(member.firstName),
-          subtitle: Text(member.beltColor),
-          onTap: () {
-            close(context, null);
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => MemberDetailPage(member: member),
-              ),
-            );
-          },
-        );
-      },
-    );
-  }
-
-  @override
-  Widget buildSuggestions(BuildContext context) {
-    // Show recent searches or popular members
-    return const Center(
-        child: Text('Search for members by name or belt color'));
-  }
-}
-
-// Add this to your members.dart exports if you create it
-class MemberDetailPage extends StatelessWidget {
-  final Member member;
-
-  const MemberDetailPage({Key? key, required this.member}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text(member.firstName)),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Belt Color: ${member.beltColor}',
-                style: TextStyle(fontSize: 18)),
-            Text('Age: ${member.age}', style: TextStyle(fontSize: 18))
-            // Add more member details as needed
-          ],
-        ),
-      ),
-    );
-  }
 }
