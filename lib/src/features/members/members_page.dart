@@ -217,6 +217,48 @@ class _MembersListState extends State<MembersList> {
     );
   }
 
+  Color _getBeltColor(String beltColor) {
+    switch (beltColor.toLowerCase()) {
+      case 'black':
+        return Colors.black;
+      case 'brown':
+        return Colors.brown;
+      case 'blue':
+        return Colors.blue;
+      case 'green':
+        return Colors.green;
+      case 'orange':
+        return Colors.orange;
+      case 'yellow':
+        return Colors.yellow;
+      case 'white':
+        return Colors.grey;
+      default:
+        return Colors.purple;
+    }
+  }
+
+  String _getBeltColorAsString(String beltColor) {
+    switch (beltColor.toLowerCase()) {
+      case 'black':
+        return 'Crni pojas';
+      case 'brown':
+        return 'Braon pojas';
+      case 'blue':
+        return 'Plavi pojas';
+      case 'green':
+        return 'Zeleni pojas';
+      case 'orange':
+        return 'Narandžasti pojas';
+      case 'yellow':
+        return 'Žuti pojas';
+      case 'white':
+        return 'Beli pojas';
+      default:
+        return beltColor[0].toUpperCase() + beltColor.substring(1);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -250,7 +292,7 @@ class _MembersListState extends State<MembersList> {
                     leading: CircleAvatar(
                         backgroundColor: _getBeltColor(member.beltColor)),
                     title: Text("${member.firstName} ${member.lastName}"),
-                    subtitle: Text('${member.beltColor} pojas'),
+                    subtitle: Text(_getBeltColorAsString(member.beltColor)),
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [

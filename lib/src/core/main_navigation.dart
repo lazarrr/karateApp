@@ -57,9 +57,9 @@ class _MainNavigationState extends State<MainNavigation> {
           });
         },
         items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.people), label: 'Members'),
+          BottomNavigationBarItem(icon: Icon(Icons.people), label: 'Članovi'),
           BottomNavigationBarItem(
-              icon: Icon(Icons.calendar_today), label: 'Attendance'),
+              icon: Icon(Icons.calendar_today), label: 'Prisustva'),
         ],
       ),
     );
