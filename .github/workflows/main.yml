@@ -1,0 +1,26 @@
+name: Build Windows
+on: push  # Runs on every push (adjust as needed)
+
+jobs:
+  build:
+    runs-on: windows-latest  # Windows VM provided by GitHub
+    steps:
+      # Checkout code (v4 is the latest)
+      - uses: actions/checkout@v4
+
+      # Set up Flutter
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable  # Use Flutter stable
+
+      # Install dependencies
+      - run: flutter pub get
+
+      # Build Windows release
+      - run: flutter build windows --release
+
+      # Upload the build artifacts (EXE + DLLs) using v4
+      - uses: actions/upload-artifact@v4
+        with:
+          name: WindowsApp
+          path: build/windows/runner/Release/
