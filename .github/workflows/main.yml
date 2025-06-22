@@ -18,7 +18,6 @@ jobs:
           channel: stable
           cache: true
 
-      # PowerShell-compatible package name derivation
       - name: Determine package name
         id: pkgname
         shell: pwsh
@@ -39,21 +38,27 @@ jobs:
       - name: Build Windows executable
         run: flutter build windows --release
 
+      - name: Verify build location
+        shell: pwsh
+        run: |
+          ls build/windows -Recurse
+          echo "Build output exists at build/windows/x64/runner/Release/"
+
       - name: Upload Windows build
         uses: actions/upload-artifact@v4
         with:
           name: WindowsApp
-          path: build/windows/runner/Release/
+          path: build/windows/x64/runner/Release/
           retention-days: 7
 
       - name: Package release
         shell: pwsh
         run: |
-          cd build/windows/runner/Release
+          cd build/windows/x64/runner/Release
           Compress-Archive -Path * -DestinationPath "${{ steps.pkgname.outputs.name }}_windows.zip"
 
       - name: Upload ZIP
         uses: actions/upload-artifact@v4
         with:
           name: ${{ steps.pkgname.outputs.name }}_windows
-          path: build/windows/runner/Release/${{ steps.pkgname.outputs.name }}_windows.zip
+          path: build/windows/x64/runner/Release/${{ steps.pkgname.outputs.name }}_windows.zip
