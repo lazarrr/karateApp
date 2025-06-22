@@ -20,8 +20,6 @@ class _AttendancePageState extends State<AttendancePage> {
   int absentCount = 0;
   int offset = 0;
   static const int _membersPerPage = 5;
-  int _totalUserCount = 0;
-
   @override
   void initState() {
     super.initState();
