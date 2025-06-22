@@ -5,7 +5,7 @@ jobs:
   build:
     runs-on: windows-latest  # Windows VM provided by GitHub
     steps:
-      # Checkout code
+      # Checkout code (v4 is the latest)
       - uses: actions/checkout@v4
 
       # Set up Flutter
@@ -19,8 +19,8 @@ jobs:
       # Build Windows release
       - run: flutter build windows --release
 
-      # Upload the build artifacts (EXE + DLLs)
-      - uses: actions/upload-artifact@v3
+      # Upload the build artifacts (EXE + DLLs) using v4
+      - uses: actions/upload-artifact@v4
         with:
           name: WindowsApp
           path: build/windows/runner/Release/
