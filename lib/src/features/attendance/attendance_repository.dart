@@ -13,7 +13,7 @@ class AttendanceRepository {
     return await db.query(
       'attendance',
       where: 'date = ? and status = 1',
-      whereArgs: [currentDate],
+      whereArgs: [currentDate.toIso8601String().split('T').first],
     ).then((value) => value.map((row) => row['member_id']).toSet().length);
   }
 
@@ -22,11 +22,11 @@ class AttendanceRepository {
     final db = await dbHelper.database;
     final result = await db.rawQuery('''
       SELECT COUNT(*) as count
-      FROM member m
+      FROM members m
       LEFT JOIN attendance a
         ON m.id = a.member_id AND a.date = ?
       WHERE a.status IS NULL OR a.status = 0
-    ''', [currentDate]);
+    ''', [currentDate.toIso8601String().split('T').first]);
     return Sqflite.firstIntValue(result) ?? 0;
   }
 
@@ -53,12 +53,11 @@ class AttendanceRepository {
     final result = await db.rawQuery('''
       SELECT m.*
       FROM members m
-      INNER JOIN attendance a
+      LEFT JOIN attendance a
         ON m.id = a.member_id
-      WHERE (a.date = ? OR a.date is null) AND (a.status = 0 OR a.status IS NULL)
+      WHERE (a.date is null OR a.date = ? ) AND (a.status is NULL OR a.status = 0)
       LIMIT ? OFFSET ?
     ''', [currentDate.toIso8601String().split('T').first, limit, offset]);
-    var r = result.map((row) => Member.fromMap(row)).toList();
     return result.map((row) => Member.fromMap(row)).toList();
   }
 }

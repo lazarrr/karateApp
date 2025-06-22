@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:karate_club_app/src/features/attendance/attendance_bloc.dart';
 import 'package:karate_club_app/src/features/attendance/attendance_bloc_event.dart';
+import 'package:karate_club_app/src/features/attendance/attendance_bloc_state.dart';
 import 'package:karate_club_app/src/models/member.dart';
 
 class AttendancePage extends StatefulWidget {
@@ -13,18 +14,43 @@ class AttendancePage extends StatefulWidget {
 }
 
 class _AttendancePageState extends State<AttendancePage> {
-  List<Member> _filteredMembers = [];
-  bool _selectMode = false;
+  List<Member> _members = [];
+  bool _showPresent = false;
+  int presentCount = 0;
+  int absentCount = 0;
   final List<int> _selectedIds = [];
 
   @override
   void initState() {
     super.initState();
-    _loadMembers();
+    _loadInitialData();
+    context.read<AttendanceBloc>().stream.listen((state) {
+      if (state is AttendanceLoaded) {
+        setState(() {
+          _showPresent == true ? _members = state.attendance : null;
+        });
+      } else if (state is AbsentMembersLoaded) {
+        setState(() {
+          _showPresent == false ? _members = state.attendance : null;
+        });
+      } else if (state is TotalPresentMembersLoaded) {
+        setState(() => presentCount = state.count);
+      } else if (state is TotalAbsentMembersLoaded) {
+        setState(() => absentCount = state.count);
+      } else if (state is AttendanceError) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: ${state.message}')),
+        );
+      }
+    });
   }
 
-  void _loadMembers() {
-    var members = context.read<AttendanceBloc>().add(FetchAbsentMembers(0, 5));
+  void _loadInitialData() {
+    final attendanceBloc = context.read<AttendanceBloc>();
+    attendanceBloc.add(FetchPresentMembers(0, 5));
+    attendanceBloc.add(FetchAbsentMembers(0, 5));
+    attendanceBloc.add(GetTotalNumberOfPresentMembers());
+    attendanceBloc.add(GetTotalNumberOfAbsentMembers());
   }
 
   void _filterMembers(String query) {
@@ -33,20 +59,13 @@ class _AttendancePageState extends State<AttendancePage> {
 
   void _toggleAttendance(Member member) {
     setState(() {
-      final index = _filteredMembers.indexWhere((m) => m.id == member.id);
+      final index = _members.indexWhere((m) => m.id == member.id);
       if (index != -1) {
         // _filteredMembers[index] = member.copyWith(
         //   lastAttendance: DateTime.now(),
         //   isPresentToday: !(member.isPresentToday ?? false),
         // );
       }
-    });
-  }
-
-  void _toggleSelectMode() {
-    setState(() {
-      _selectMode = !_selectMode;
-      if (!_selectMode) _selectedIds.clear();
     });
   }
 
@@ -60,25 +79,8 @@ class _AttendancePageState extends State<AttendancePage> {
     });
   }
 
-  void _markSelectedAsPresent(bool present) {
-    setState(() {
-      _filteredMembers = _filteredMembers.map((member) {
-        if (_selectedIds.contains(member.id)) {
-          return member.copyWith(dateOfBirth: DateTime.now());
-        }
-        return member;
-      }).toList();
-      _selectMode = false;
-      _selectedIds.clear();
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
-    final presentCount = 2;
-    // _filteredMembers.where((m) => m.isPresentToday ?? false).length;
-    final absentCount = _filteredMembers.length - presentCount;
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('Dnevna Prisustva'),
@@ -106,26 +108,34 @@ class _AttendancePageState extends State<AttendancePage> {
                   children: [
                     GestureDetector(
                       onTap: () async {
-                        // Example: Call your repository endpoint here
-                        // await AttendanceRepository().markAllPresent();
+                        setState(() {
+                          _showPresent = false;
+                        });
+                        context
+                            .read<AttendanceBloc>()
+                            .add(FetchAbsentMembers(0, 5));
                       },
                       child: _StatBadge(
                         color: Colors.red,
                         icon: Icons.close,
                         count: absentCount,
                         label: 'Odsutni',
+                        isActive: !_showPresent,
                       ),
                     ),
                     GestureDetector(
                       onTap: () async {
-                        // Example: Call your repository endpoint here
-                        // await AttendanceRepository().markAllPresent();
+                        _showPresent = true;
+                        context
+                            .read<AttendanceBloc>()
+                            .add(FetchPresentMembers(0, 5));
                       },
                       child: _StatBadge(
                         color: Colors.green,
                         icon: Icons.check,
                         count: presentCount,
                         label: 'Prisutni',
+                        isActive: _showPresent,
                       ),
                     )
                   ],
@@ -137,13 +147,13 @@ class _AttendancePageState extends State<AttendancePage> {
           // Attendance List
           Expanded(
             child: ListView.builder(
-              itemCount: _filteredMembers.length,
+              itemCount: _members.length,
               itemBuilder: (context, index) {
-                final member = _filteredMembers[index];
+                final member = _members[index];
                 return _AttendanceCard(
                   member: member,
                   isSelected: _selectedIds.contains(member.id),
-                  selectMode: _selectMode,
+                  selectMode: false,
                   onToggleSelect: () => _toggleSelection(member.id),
                   onToggleAttendance: () => _toggleAttendance(member),
                 );
@@ -151,16 +161,6 @@ class _AttendancePageState extends State<AttendancePage> {
             ),
           ),
         ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          // TODO: Save to DB
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Attendance saved!')),
-          );
-        },
-        child: const Icon(Icons.save),
-        tooltip: 'Save Attendance',
       ),
     );
   }
@@ -247,12 +247,14 @@ class _StatBadge extends StatelessWidget {
   final IconData icon;
   final int count;
   final String label;
+  final bool isActive;
 
   const _StatBadge({
     required this.color,
     required this.icon,
     required this.count,
     required this.label,
+    required this.isActive,
   });
 
   @override
@@ -262,6 +264,7 @@ class _StatBadge extends StatelessWidget {
       decoration: BoxDecoration(
         color: color.withOpacity(0.2),
         borderRadius: BorderRadius.circular(20),
+        border: isActive ? Border.all(color: color, width: 2) : null,
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -270,7 +273,10 @@ class _StatBadge extends StatelessWidget {
           const SizedBox(width: 4),
           Text(
             '$count $label',
-            style: TextStyle(color: color, fontWeight: FontWeight.bold),
+            style: TextStyle(
+              color: color,
+              fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
+            ),
           ),
         ],
       ),

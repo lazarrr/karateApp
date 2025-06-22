@@ -20,3 +20,7 @@ class FetchAbsentMembers extends AttendanceEvent {
   final int limit;
   FetchAbsentMembers(this.offset, this.limit);
 }
+
+class GetTotalNumberOfPresentMembers extends AttendanceEvent {}
+
+class GetTotalNumberOfAbsentMembers extends AttendanceEvent {}

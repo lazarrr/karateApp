@@ -9,6 +9,34 @@ class AttendanceBloc extends Bloc<AttendanceEvent, AttendanceState> {
   AttendanceBloc(this.repository) : super(AttendanceInitial()) {
     on<FetchPresentMembers>(_onFetchPresentMembers);
     on<FetchAbsentMembers>(_onFetchAbsentMembers);
+    on<GetTotalNumberOfPresentMembers>(_onGetTotalNumberOfPresentMembers);
+    on<GetTotalNumberOfAbsentMembers>(_onGetTotalNumberOfAbsentMembers);
+  }
+
+  Future<void> _onGetTotalNumberOfAbsentMembers(
+    GetTotalNumberOfAbsentMembers event,
+    Emitter<AttendanceState> emit,
+  ) async {
+    emit(AttendanceLoading());
+    try {
+      final count = await repository.getTotalNumberOfAbsentMembers();
+      emit(TotalAbsentMembersLoaded(count));
+    } catch (e) {
+      emit(AttendanceError('Failed to load total absent members'));
+    }
+  }
+
+  Future<void> _onGetTotalNumberOfPresentMembers(
+    GetTotalNumberOfPresentMembers event,
+    Emitter<AttendanceState> emit,
+  ) async {
+    emit(AttendanceLoading());
+    try {
+      final count = await repository.getTotalNumberOfPresentMembers();
+      emit(TotalPresentMembersLoaded(count));
+    } catch (e) {
+      emit(AttendanceError('Failed to load total present members'));
+    }
   }
 
   Future<void> _onFetchPresentMembers(
@@ -37,7 +65,7 @@ class AttendanceBloc extends Bloc<AttendanceEvent, AttendanceState> {
         limit: event.limit,
         offset: event.offset,
       );
-      emit(AttendanceLoaded(members));
+      emit(AbsentMembersLoaded(members));
     } catch (e) {
       emit(AttendanceError('Failed to load members'));
     }
