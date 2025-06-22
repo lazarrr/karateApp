@@ -1,18 +1,54 @@
-steps:
-  - uses: actions/checkout@v4
+name: Build Windows
+on:
+  push:
+    branches: [ main ]  # Trigger on pushes to main branch
+  workflow_dispatch:    # Allow manual triggers
 
-  - uses: subosito/flutter-action@v2
-    with:
-      channel: stable
+jobs:
+  build-windows:
+    runs-on: windows-latest  # Windows build environment
 
-  # Add this step to ensure Windows is configured
-  - name: Add Windows support
-    run: flutter create --platforms=windows .
+    steps:
+      # Checkout code
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-  - run: flutter pub get
-  - run: flutter build windows --release
+      # Set up Flutter
+      - name: Install Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true  # Enable dependency caching
 
-  - uses: actions/upload-artifact@v4
-    with:
-      name: WindowsApp
-      path: build/windows/runner/Release/
+      # Ensure Windows support is configured
+      - name: Add Windows platform
+        run: flutter create --platforms=windows --project-name MyApp .
+
+      # Get dependencies
+      - name: Install dependencies
+        run: flutter pub get
+
+      # Build Windows release
+      - name: Build Windows executable
+        run: flutter build windows --release
+
+      # Upload artifact
+      - name: Upload Windows build
+        uses: actions/upload-artifact@v4
+        with:
+          name: WindowsApp
+          path: build/windows/runner/Release/
+          retention-days: 7  # Auto-delete after 1 week
+
+      # (Optional) Create ZIP archive
+      - name: Package release
+        run: |
+          cd build/windows/runner/Release
+          Compress-Archive -Path * -DestinationPath MyApp_Windows.zip
+        shell: pwsh
+
+      - name: Upload ZIP
+        uses: actions/upload-artifact@v4
+        with:
+          name: MyApp_Windows
+          path: build/windows/runner/Release/MyApp_Windows.zip
