@@ -49,6 +49,7 @@ class MembersPage extends StatelessWidget {
     final lastNameController = TextEditingController();
     final beltController = TextEditingController();
     final ageController = TextEditingController();
+    final mailController = TextEditingController();
 
     showDialog(
       context: context,
@@ -64,6 +65,10 @@ class MembersPage extends StatelessWidget {
             TextField(
               controller: lastNameController,
               decoration: const InputDecoration(labelText: 'Prezime'),
+            ),
+            TextField(
+              controller: mailController,
+              decoration: const InputDecoration(labelText: 'Email'),
             ),
             GestureDetector(
               onTap: () async {
@@ -157,7 +162,8 @@ class MembersPage extends StatelessWidget {
                   firstName: nameController.text,
                   beltColor: beltController.text,
                   lastName: lastNameController.text,
-                  dateOfBirth: DateTime.now());
+                  dateOfBirth: DateTime.now(),
+                  email: mailController.text);
               context.read<MembersBloc>().add(AddMember(newMember));
               Navigator.pop(context);
             },
@@ -390,6 +396,7 @@ void _showEditMemberDialog(BuildContext context, Member member) {
   final beltController = TextEditingController(text: member.beltColor);
   final ageController =
       TextEditingController(text: member.dateOfBirth.toString());
+  final mailController = TextEditingController(text: member.email ?? '');
 
   const beltColors = [
     'white',
@@ -415,6 +422,10 @@ void _showEditMemberDialog(BuildContext context, Member member) {
           TextField(
             controller: lastNameController,
             decoration: const InputDecoration(labelText: 'Prezime'),
+          ),
+          TextField(
+            controller: mailController,
+            decoration: const InputDecoration(labelText: 'Email'),
           ),
           GestureDetector(
             onTap: () async {

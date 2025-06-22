@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:karate_club_app/src/features/attendance/attendance_bloc.dart';
+import 'package:karate_club_app/src/features/attendance/attendance_bloc_event.dart';
 import 'package:karate_club_app/src/models/member.dart';
 
 class AttendancePage extends StatefulWidget {
-  final List<Member> members;
-
-  const AttendancePage({Key? key, required this.members}) : super(key: key);
+  const AttendancePage({super.key});
 
   @override
+  // ignore: library_private_types_in_public_api
   _AttendancePageState createState() => _AttendancePageState();
 }
 
@@ -18,17 +20,15 @@ class _AttendancePageState extends State<AttendancePage> {
   @override
   void initState() {
     super.initState();
-    _filteredMembers = widget.members;
+    _loadMembers();
+  }
+
+  void _loadMembers() {
+    var members = context.read<AttendanceBloc>().add(FetchAbsentMembers(0, 5));
   }
 
   void _filterMembers(String query) {
-    setState(() {
-      _filteredMembers = widget.members
-          .where((member) =>
-              member.firstName.toLowerCase().contains(query.toLowerCase()) ||
-              member.beltColor.toLowerCase().contains(query.toLowerCase()))
-          .toList();
-    });
+    setState(() {});
   }
 
   void _toggleAttendance(Member member) {
@@ -81,26 +81,7 @@ class _AttendancePageState extends State<AttendancePage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Daily Attendance'),
-        actions: [
-          IconButton(
-            icon: Icon(_selectMode ? Icons.done : Icons.playlist_add_check),
-            onPressed: _toggleSelectMode,
-            tooltip: _selectMode ? 'Finish Selection' : 'Select Multiple',
-          ),
-          if (_selectMode && _selectedIds.isNotEmpty)
-            IconButton(
-              icon: const Icon(Icons.check_circle),
-              onPressed: () => _markSelectedAsPresent(true),
-              tooltip: 'Mark Selected as Present',
-            ),
-          if (_selectMode && _selectedIds.isNotEmpty)
-            IconButton(
-              icon: const Icon(Icons.cancel),
-              onPressed: () => _markSelectedAsPresent(false),
-              tooltip: 'Mark Selected as Absent',
-            ),
-        ],
+        title: const Text('Dnevna Prisustva'),
       ),
       body: Column(
         children: [
@@ -111,7 +92,7 @@ class _AttendancePageState extends State<AttendancePage> {
               children: [
                 TextField(
                   decoration: InputDecoration(
-                    hintText: 'Search by name or belt...',
+                    hintText: 'Pretraži po imenu ili pojasu...',
                     prefixIcon: const Icon(Icons.search),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
@@ -123,18 +104,30 @@ class _AttendancePageState extends State<AttendancePage> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
-                    _StatBadge(
-                      color: Colors.green,
-                      icon: Icons.check,
-                      count: presentCount,
-                      label: 'Present',
+                    GestureDetector(
+                      onTap: () async {
+                        // Example: Call your repository endpoint here
+                        // await AttendanceRepository().markAllPresent();
+                      },
+                      child: _StatBadge(
+                        color: Colors.red,
+                        icon: Icons.close,
+                        count: absentCount,
+                        label: 'Odsutni',
+                      ),
                     ),
-                    _StatBadge(
-                      color: Colors.red,
-                      icon: Icons.close,
-                      count: absentCount,
-                      label: 'Absent',
-                    ),
+                    GestureDetector(
+                      onTap: () async {
+                        // Example: Call your repository endpoint here
+                        // await AttendanceRepository().markAllPresent();
+                      },
+                      child: _StatBadge(
+                        color: Colors.green,
+                        icon: Icons.check,
+                        count: presentCount,
+                        label: 'Prisutni',
+                      ),
+                    )
                   ],
                 ),
               ],

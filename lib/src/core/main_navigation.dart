@@ -13,33 +13,8 @@ class MainNavigation extends StatefulWidget {
 class _MainNavigationState extends State<MainNavigation> {
   int _currentIndex = 0;
   final List<Widget> _pages = [
-    MembersPage(),
-    AttendancePage(
-      members: [
-        Member(
-          id: 1,
-          firstName: 'John',
-          lastName: 'Doe',
-          beltColor: 'Black',
-          dateOfBirth: DateTime(1998, 5, 20),
-        ),
-        Member(
-          id: 2,
-          firstName: 'Jane',
-          lastName: 'Smith',
-          beltColor: 'Blue',
-          dateOfBirth: DateTime(2001, 8, 15),
-        ),
-        Member(
-          id: 3,
-          firstName: 'Bob',
-          lastName: 'Johnson',
-          beltColor: 'Red',
-          dateOfBirth: DateTime(1993, 3, 10),
-        ),
-      ],
-    ),
-    // AttendancePage(),
+    const MembersPage(),
+    AttendancePage(),
   ];
 
   @override

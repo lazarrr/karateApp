@@ -6,13 +6,15 @@ class Member {
   final String lastName;
   final DateTime dateOfBirth;
   final String beltColor;
+  final String email;
 
   Member(
       {required this.id,
       required this.firstName,
       required this.lastName,
       required this.dateOfBirth,
-      required this.beltColor});
+      required this.beltColor,
+      required this.email});
 
   // Convert a Member into a Map
   Map<String, dynamic> toMap() {
@@ -20,7 +22,8 @@ class Member {
       'first_name': firstName,
       'last_name': lastName,
       'date_of_birth': DatabaseHelper.formatDate(dateOfBirth),
-      'belt_color': beltColor
+      'belt_color': beltColor,
+      'email': email,
     };
   }
 
@@ -29,13 +32,15 @@ class Member {
       String? firstName,
       String? lastName,
       required DateTime dateOfBirth,
-      String? beltColor}) {
+      String? beltColor,
+      String? email}) {
     return Member(
         id: id ?? this.id,
         firstName: firstName ?? this.firstName,
         lastName: lastName ?? this.lastName,
         beltColor: beltColor ?? this.beltColor,
-        dateOfBirth: dateOfBirth);
+        dateOfBirth: dateOfBirth,
+        email: email ?? this.email);
   }
 
   // Create a Member from a Map
@@ -45,7 +50,8 @@ class Member {
         firstName: map['first_name'],
         lastName: map['last_name'],
         dateOfBirth: DatabaseHelper.parseDate(map['date_of_birth']),
-        beltColor: map['belt_color']);
+        beltColor: map['belt_color'],
+        email: map['email'] ?? '');
   }
 
   // Calculate age from date of birth

@@ -14,7 +14,7 @@ class DatabaseHelper {
   Future<Database> get database async => _database ??= await _initDatabase();
 
   Future<Database> _initDatabase() async {
-    // await deleteDatabase(join(await getDatabasesPath(), _databaseName));
+    //await deleteDatabase(join(await getDatabasesPath(), _databaseName));
     final databasesPath = await getDatabasesPath();
     final path = join(databasesPath, _databaseName);
 
@@ -33,8 +33,9 @@ class DatabaseHelper {
         first_name TEXT NOT NULL,
         last_name TEXT NOT NULL,
         belt_color TEXT NOT NULL,
-        date_of_birth TEXT NOT NULL
-      )
+        date_of_birth TEXT NOT NULL,
+        email TEXT NOT NULL
+        )
     ''');
 
     await db.execute('''
@@ -43,7 +44,6 @@ class DatabaseHelper {
         member_id INTEGER NOT NULL,
         date TEXT NOT NULL,
         status INTEGER NOT NULL, -- 1 for present, 0 for absent
-        notes TEXT,
         FOREIGN KEY (member_id) REFERENCES members (id) ON DELETE CASCADE
       )
     ''');
