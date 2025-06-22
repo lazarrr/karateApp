@@ -11,6 +11,7 @@ class AttendanceBloc extends Bloc<AttendanceEvent, AttendanceState> {
     on<FetchAbsentMembers>(_onFetchAbsentMembers);
     on<GetTotalNumberOfPresentMembers>(_onGetTotalNumberOfPresentMembers);
     on<GetTotalNumberOfAbsentMembers>(_onGetTotalNumberOfAbsentMembers);
+    on<AddAttendance>(_onAddAttendance);
   }
 
   Future<void> _onGetTotalNumberOfAbsentMembers(
@@ -68,6 +69,19 @@ class AttendanceBloc extends Bloc<AttendanceEvent, AttendanceState> {
       emit(AbsentMembersLoaded(members));
     } catch (e) {
       emit(AttendanceError('Failed to load members'));
+    }
+  }
+
+  Future<void> _onAddAttendance(
+    AddAttendance event,
+    Emitter<AttendanceState> emit,
+  ) async {
+    emit(AttendanceLoading());
+    try {
+      await repository.markMemberPresent(event.memberId);
+      emit(AttendanceAdded());
+    } catch (e) {
+      emit(AttendanceError('Failed to add attendance'));
     }
   }
 }

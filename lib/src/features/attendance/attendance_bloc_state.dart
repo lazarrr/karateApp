@@ -33,3 +33,7 @@ class TotalAbsentMembersLoaded extends AttendanceState {
   final int count;
   TotalAbsentMembersLoaded(this.count);
 }
+
+class AttendanceAdded extends AttendanceState {
+  AttendanceAdded();
+}

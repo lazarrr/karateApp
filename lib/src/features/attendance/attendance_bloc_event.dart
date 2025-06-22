@@ -24,3 +24,8 @@ class FetchAbsentMembers extends AttendanceEvent {
 class GetTotalNumberOfPresentMembers extends AttendanceEvent {}
 
 class GetTotalNumberOfAbsentMembers extends AttendanceEvent {}
+
+class AddAttendance extends AttendanceEvent {
+  final int memberId;
+  AddAttendance(this.memberId);
+}

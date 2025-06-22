@@ -60,4 +60,34 @@ class AttendanceRepository {
     ''', [currentDate.toIso8601String().split('T').first, limit, offset]);
     return result.map((row) => Member.fromMap(row)).toList();
   }
+
+  Future<void> markMemberPresent(int memberId) async {
+    final db = await dbHelper.database;
+    final dateString = DateTime.now().toIso8601String().split('T').first;
+
+    // Check if record exists
+    final existing = await db.query(
+      'attendance',
+      where: 'member_id = ? AND date = ?',
+      whereArgs: [memberId, dateString],
+      limit: 1,
+    );
+
+    if (existing.isNotEmpty) {
+      // Update status to 1 (present)
+      await db.update(
+        'attendance',
+        {'status': 1},
+        where: 'member_id = ? AND date = ?',
+        whereArgs: [memberId, dateString],
+      );
+    } else {
+      // Insert new record
+      await db.insert('attendance', {
+        'member_id': memberId,
+        'date': dateString,
+        'status': 1,
+      });
+    }
+  }
 }

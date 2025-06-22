@@ -18,7 +18,6 @@ class _AttendancePageState extends State<AttendancePage> {
   bool _showPresent = false;
   int presentCount = 0;
   int absentCount = 0;
-  final List<int> _selectedIds = [];
 
   @override
   void initState() {
@@ -57,25 +56,11 @@ class _AttendancePageState extends State<AttendancePage> {
     setState(() {});
   }
 
-  void _toggleAttendance(Member member) {
-    setState(() {
-      final index = _members.indexWhere((m) => m.id == member.id);
-      if (index != -1) {
-        // _filteredMembers[index] = member.copyWith(
-        //   lastAttendance: DateTime.now(),
-        //   isPresentToday: !(member.isPresentToday ?? false),
-        // );
-      }
-    });
-  }
-
   void _toggleSelection(int memberId) {
     setState(() {
-      if (_selectedIds.contains(memberId)) {
-        _selectedIds.remove(memberId);
-      } else {
-        _selectedIds.add(memberId);
-      }
+      _showPresent == false
+          ? context.read<AttendanceBloc>().add(AddAttendance(memberId))
+          : null;
     });
   }
 
@@ -151,12 +136,10 @@ class _AttendancePageState extends State<AttendancePage> {
               itemBuilder: (context, index) {
                 final member = _members[index];
                 return _AttendanceCard(
-                  member: member,
-                  isSelected: _selectedIds.contains(member.id),
-                  selectMode: false,
-                  onToggleSelect: () => _toggleSelection(member.id),
-                  onToggleAttendance: () => _toggleAttendance(member),
-                );
+                    member: member,
+                    isSelected: _showPresent,
+                    selectMode: false,
+                    onToggleSelect: () => _toggleSelection(member.id));
               },
             ),
           ),
@@ -173,15 +156,12 @@ class _AttendanceCard extends StatelessWidget {
   final bool selectMode;
   final bool isSelected;
   final VoidCallback onToggleSelect;
-  final VoidCallback onToggleAttendance;
 
-  const _AttendanceCard({
-    required this.member,
-    required this.selectMode,
-    required this.isSelected,
-    required this.onToggleSelect,
-    required this.onToggleAttendance,
-  });
+  const _AttendanceCard(
+      {required this.member,
+      required this.selectMode,
+      required this.isSelected,
+      required this.onToggleSelect});
 
   @override
   Widget build(BuildContext context) {
@@ -189,7 +169,7 @@ class _AttendanceCard extends StatelessWidget {
       margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       color: isSelected ? Colors.blue[50] : null,
       child: InkWell(
-        onTap: selectMode ? onToggleSelect : onToggleAttendance,
+        onTap: selectMode ? onToggleSelect : null,
         onLongPress: onToggleSelect,
         child: Padding(
           padding: const EdgeInsets.all(12),
@@ -225,14 +205,15 @@ class _AttendanceCard extends StatelessWidget {
               ),
               IconButton(
                 // is present today not is active
-                icon: const Icon(
-                  1 == 1 ?? false
+                icon: Icon(
+                  isSelected == true
                       ? Icons.check_circle
                       : Icons.radio_button_unchecked,
-                  color: 1 == 1 ?? false ? Colors.green : Colors.grey,
+                  color: isSelected == true ? Colors.green : Colors.grey,
                 ),
-                onPressed: selectMode ? null : onToggleAttendance,
-                tooltip: 1 == 1 ?? false ? 'Mark as Absent' : 'Mark as Present',
+                onPressed: selectMode ? null : null,
+                tooltip:
+                    isSelected == true ? 'Mark as Absent' : 'Mark as Present',
               ),
             ],
           ),
