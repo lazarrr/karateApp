@@ -8,7 +8,7 @@ class AppRouter {
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
       case members:
-        return MaterialPageRoute(builder: (_) => MembersPage());
+        return MaterialPageRoute(builder: (_) => const MembersPage());
       case attendance:
       // return MaterialPageRoute(builder: (_) => AttendancePage());
       default:

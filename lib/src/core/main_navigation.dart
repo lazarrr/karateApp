@@ -4,12 +4,12 @@ import 'package:karate_club_app/src/features/attendance/attendance_bloc.dart';
 import 'package:karate_club_app/src/features/attendance/attendance_bloc_event.dart';
 import 'package:karate_club_app/src/features/attendance/attendance_page.dart';
 import 'package:karate_club_app/src/features/members/members_page.dart';
-import 'package:karate_club_app/src/models/member.dart';
 
 class MainNavigation extends StatefulWidget {
-  const MainNavigation({Key? key}) : super(key: key);
+  const MainNavigation({super.key});
 
   @override
+  // ignore: library_private_types_in_public_api
   _MainNavigationState createState() => _MainNavigationState();
 }
 

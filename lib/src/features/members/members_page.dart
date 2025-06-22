@@ -30,18 +30,7 @@ class MembersPage extends StatelessWidget {
             ),
           ],
         ),
-        body: BlocBuilder<MembersBloc, MembersState>(
-          builder: (context, state) {
-            if (state is MembersLoading) {
-              return const Center(child: CircularProgressIndicator());
-            } else if (state is MembersLoaded) {
-              return MembersList(members: state.members);
-            } else if (state is MembersError) {
-              return Center(child: Text(state.message));
-            }
-            return const Center(child: Text('Nije pronađen nijedan član'));
-          },
-        ));
+        body: const MembersList());
   }
 
   void _showAddMemberDialog(BuildContext context) {
@@ -87,7 +76,7 @@ class MembersPage extends StatelessWidget {
                 child: TextField(
                   controller: ageController,
                   decoration: const InputDecoration(
-                    labelText: 'Dattm rođenja',
+                    labelText: 'Datum rođenja',
                     hintText: 'Izaberite datum rođenja',
                   ),
                 ),
@@ -176,52 +165,45 @@ class MembersPage extends StatelessWidget {
 }
 
 class MembersList extends StatefulWidget {
-  final List<Member> members;
-
-  const MembersList({Key? key, required this.members}) : super(key: key);
+  const MembersList({super.key});
 
   @override
   State<MembersList> createState() => _MembersListState();
 }
 
 class _MembersListState extends State<MembersList> {
-  late List<Member> _filteredMembers;
-  int _currentPage = 0;
+  late List<Member> members;
+  // int _currentPage = 0;
+  int offset = 0;
   static const int _membersPerPage = 5;
+  int _totalUserCount = 0;
 
   @override
   void initState() {
     super.initState();
-    _filteredMembers = widget.members;
-  }
-
-  @override
-  void didUpdateWidget(covariant MembersList oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.members != widget.members) {
-      _filteredMembers = widget.members;
-    }
-  }
-
-  void _filterMembers(String query) {
-    setState(() {
-      _filteredMembers = widget.members
-          .where((member) =>
-              member.firstName.toLowerCase().contains(query.toLowerCase()) ||
-              member.lastName.toLowerCase().contains(query.toLowerCase()) ||
-              member.beltColor.toLowerCase().contains(query.toLowerCase()))
-          .toList();
+    context.read<MembersBloc>().add(GetTotalCountOfMembers());
+    context.read<MembersBloc>().add(LoadMembers(
+          offset: offset,
+          limit: _membersPerPage,
+        ));
+    context.read<MembersBloc>().stream.listen((state) {
+      if (state is TotalCountOfMembers) {
+        setState(() {
+          _totalUserCount = state.count;
+        });
+      } else if (state is MembersLoaded) {
+        setState(() {
+          members = state.members;
+        });
+      } else if (state is MembersError) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(state.message)),
+        );
+      }
     });
   }
 
-  List<Member> get _paginatedMembers {
-    final startIndex = _currentPage * _membersPerPage;
-    final endIndex = startIndex + _membersPerPage;
-    return _filteredMembers.sublist(
-      startIndex,
-      endIndex > _filteredMembers.length ? _filteredMembers.length : endIndex,
-    );
-  }
+  void _filterMembers(String query) {}
 
   Color _getBeltColor(String beltColor) {
     switch (beltColor.toLowerCase()) {
@@ -274,7 +256,7 @@ class _MembersListState extends State<MembersList> {
             padding: const EdgeInsets.all(8.0),
             child: TextField(
               decoration: InputDecoration(
-                hintText: 'Pretraži članove o imenu ili boji pojasa...',
+                hintText: 'Pretraži članove o imenu ili prezimenu...',
                 prefixIcon: const Icon(Icons.search),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
@@ -282,15 +264,15 @@ class _MembersListState extends State<MembersList> {
               ),
               onChanged: (query) {
                 _filterMembers(query);
-                _currentPage = 0; // Reset to first page on new search
+                offset = 0; // Reset to first page on new search
               },
             ),
           ),
           Expanded(
             child: ListView.builder(
-              itemCount: _paginatedMembers.length,
+              itemCount: members.length,
               itemBuilder: (context, index) {
-                final member = _paginatedMembers[index];
+                final member = members[index];
                 return Card(
                   margin:
                       const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -347,16 +329,27 @@ class _MembersListState extends State<MembersList> {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 TextButton(
-                  onPressed: _currentPage > 0
-                      ? () => setState(() => _currentPage--)
+                  onPressed: offset > 0
+                      ? () => setState(() {
+                            offset -= _membersPerPage;
+                            context.read<MembersBloc>().add(LoadMembers(
+                                  offset: offset,
+                                  limit: _membersPerPage,
+                                ));
+                          })
                       : null,
                   child: const Text('Prethodna'),
                 ),
-                Text('Strana ${_currentPage + 1}'),
+                Text('Strana ${(offset ~/ _membersPerPage) + 1}'),
                 TextButton(
-                  onPressed: (_currentPage + 1) * _membersPerPage <
-                          _filteredMembers.length
-                      ? () => setState(() => _currentPage++)
+                  onPressed: (offset + 1) * _membersPerPage < _totalUserCount
+                      ? () => setState(() {
+                            offset += _membersPerPage;
+                            context.read<MembersBloc>().add(LoadMembers(
+                                  offset: offset,
+                                  limit: _membersPerPage,
+                                ));
+                          })
                       : null,
                   child: const Text('Sledeća'),
                 ),
@@ -396,7 +389,7 @@ void _showEditMemberDialog(BuildContext context, Member member) {
   final beltController = TextEditingController(text: member.beltColor);
   final ageController =
       TextEditingController(text: member.dateOfBirth.toString());
-  final mailController = TextEditingController(text: member.email ?? '');
+  final mailController = TextEditingController(text: member.email);
 
   const beltColors = [
     'white',

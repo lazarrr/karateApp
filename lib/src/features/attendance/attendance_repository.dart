@@ -31,7 +31,7 @@ class AttendanceRepository {
   }
 
   Future<List<Member>> fetchPresentMembers(
-      {int limit = 5, int offset = 0}) async {
+      {int limit = 5, int offset = 0, String name = ''}) async {
     final currentDate = DateTime.now();
     final db = await dbHelper.database;
     final result = await db.rawQuery('''
@@ -40,14 +40,22 @@ class AttendanceRepository {
       INNER JOIN attendance a
         ON m.id = a.member_id
       WHERE a.date = ? AND a.status = 1
+        AND (? = '' OR m.first_name LIKE ? OR m.last_name LIKE ?)
       LIMIT ? OFFSET ?
-    ''', [currentDate.toIso8601String().split('T').first, limit, offset]);
+    ''', [
+      currentDate.toIso8601String().split('T').first,
+      '%$name%',
+      '%$name%',
+      '%$name%',
+      limit,
+      offset
+    ]);
 
     return result.map((row) => Member.fromMap(row)).toList();
   }
 
   Future<List<Member>> fetchAbsentMembers(
-      {int limit = 5, int offset = 0}) async {
+      {int limit = 5, int offset = 0, String name = ''}) async {
     final currentDate = DateTime.now();
     final db = await dbHelper.database;
     final result = await db.rawQuery('''
@@ -55,9 +63,18 @@ class AttendanceRepository {
       FROM members m
       LEFT JOIN attendance a
         ON m.id = a.member_id
-      WHERE (a.date is null OR a.date = ? ) AND (a.status is NULL OR a.status = 0)
+      WHERE (a.date IS NULL OR a.date = ?) 
+        AND (a.status IS NULL OR a.status = 0)
+        AND (? = '' OR m.first_name LIKE ? OR m.last_name LIKE ?)
       LIMIT ? OFFSET ?
-    ''', [currentDate.toIso8601String().split('T').first, limit, offset]);
+    ''', [
+      currentDate.toIso8601String().split('T').first,
+      '%$name%',
+      '%$name%',
+      '%$name%',
+      limit,
+      offset
+    ]);
     return result.map((row) => Member.fromMap(row)).toList();
   }
 
@@ -87,6 +104,36 @@ class AttendanceRepository {
         'member_id': memberId,
         'date': dateString,
         'status': 1,
+      });
+    }
+  }
+
+  Future<void> markMemberAbsent(int memberId) async {
+    final db = await dbHelper.database;
+    final dateString = DateTime.now().toIso8601String().split('T').first;
+
+    // Check if record exists
+    final existing = await db.query(
+      'attendance',
+      where: 'member_id = ? AND date = ?',
+      whereArgs: [memberId, dateString],
+      limit: 1,
+    );
+
+    if (existing.isNotEmpty) {
+      // Update status to 0 (absent)
+      await db.update(
+        'attendance',
+        {'status': 0},
+        where: 'member_id = ? AND date = ?',
+        whereArgs: [memberId, dateString],
+      );
+    } else {
+      // Insert new record
+      await db.insert('attendance', {
+        'member_id': memberId,
+        'date': dateString,
+        'status': 0,
       });
     }
   }

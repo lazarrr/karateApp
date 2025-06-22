@@ -6,19 +6,20 @@ import 'package:karate_club_app/src/features/attendance/attendance_repository.da
 class AttendanceBloc extends Bloc<AttendanceEvent, AttendanceState> {
   final AttendanceRepository repository;
 
-  AttendanceBloc(this.repository) : super(AttendanceInitial()) {
+  AttendanceBloc(this.repository) : super(AttendanceInitial([])) {
     on<FetchPresentMembers>(_onFetchPresentMembers);
     on<FetchAbsentMembers>(_onFetchAbsentMembers);
     on<GetTotalNumberOfPresentMembers>(_onGetTotalNumberOfPresentMembers);
     on<GetTotalNumberOfAbsentMembers>(_onGetTotalNumberOfAbsentMembers);
     on<AddAttendance>(_onAddAttendance);
+    on<RemoveAttendance>(_onRemoveAttendance);
   }
 
   Future<void> _onGetTotalNumberOfAbsentMembers(
     GetTotalNumberOfAbsentMembers event,
     Emitter<AttendanceState> emit,
   ) async {
-    emit(AttendanceLoading());
+    emit(AttendanceLoading([]));
     try {
       final count = await repository.getTotalNumberOfAbsentMembers();
       emit(TotalAbsentMembersLoaded(count));
@@ -31,7 +32,7 @@ class AttendanceBloc extends Bloc<AttendanceEvent, AttendanceState> {
     GetTotalNumberOfPresentMembers event,
     Emitter<AttendanceState> emit,
   ) async {
-    emit(AttendanceLoading());
+    emit(AttendanceLoading([]));
     try {
       final count = await repository.getTotalNumberOfPresentMembers();
       emit(TotalPresentMembersLoaded(count));
@@ -44,12 +45,10 @@ class AttendanceBloc extends Bloc<AttendanceEvent, AttendanceState> {
     FetchPresentMembers event,
     Emitter<AttendanceState> emit,
   ) async {
-    emit(AttendanceLoading());
+    emit(AttendanceLoading([]));
     try {
       final members = await repository.fetchPresentMembers(
-        limit: event.limit,
-        offset: event.offset,
-      );
+          limit: event.limit, offset: event.offset, name: event.name);
       emit(AttendanceLoaded(members));
     } catch (e) {
       emit(AttendanceError('Failed to load members'));
@@ -60,12 +59,10 @@ class AttendanceBloc extends Bloc<AttendanceEvent, AttendanceState> {
     FetchAbsentMembers event,
     Emitter<AttendanceState> emit,
   ) async {
-    emit(AttendanceLoading());
+    emit(AttendanceLoading([]));
     try {
       final members = await repository.fetchAbsentMembers(
-        limit: event.limit,
-        offset: event.offset,
-      );
+          limit: event.limit, offset: event.offset, name: event.name);
       emit(AbsentMembersLoaded(members));
     } catch (e) {
       emit(AttendanceError('Failed to load members'));
@@ -76,12 +73,25 @@ class AttendanceBloc extends Bloc<AttendanceEvent, AttendanceState> {
     AddAttendance event,
     Emitter<AttendanceState> emit,
   ) async {
-    emit(AttendanceLoading());
+    emit(AttendanceLoading([]));
     try {
       await repository.markMemberPresent(event.memberId);
-      emit(AttendanceAdded());
+      emit(AttendanceAdded([]));
     } catch (e) {
       emit(AttendanceError('Failed to add attendance'));
+    }
+  }
+
+  Future<void> _onRemoveAttendance(
+    RemoveAttendance event,
+    Emitter<AttendanceState> emit,
+  ) async {
+    emit(AttendanceLoading([]));
+    try {
+      await repository.markMemberAbsent(event.memberId);
+      emit(AttendanceRemoved([]));
+    } catch (e) {
+      emit(AttendanceError('Failed to remove attendance'));
     }
   }
 }

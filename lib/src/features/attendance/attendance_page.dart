@@ -18,6 +18,8 @@ class _AttendancePageState extends State<AttendancePage> {
   bool _showPresent = false;
   int presentCount = 0;
   int absentCount = 0;
+  int offset = 0;
+  int limit = 5;
 
   @override
   void initState() {
@@ -36,6 +38,10 @@ class _AttendancePageState extends State<AttendancePage> {
         setState(() => presentCount = state.count);
       } else if (state is TotalAbsentMembersLoaded) {
         setState(() => absentCount = state.count);
+      } else if (state is AttendanceAdded) {
+        _loadInitialData();
+      } else if (state is AttendanceRemoved) {
+        _loadInitialData();
       } else if (state is AttendanceError) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error: ${state.message}')),
@@ -46,22 +52,27 @@ class _AttendancePageState extends State<AttendancePage> {
 
   void _loadInitialData() {
     final attendanceBloc = context.read<AttendanceBloc>();
-    attendanceBloc.add(FetchPresentMembers(0, 5));
-    attendanceBloc.add(FetchAbsentMembers(0, 5));
+    attendanceBloc.add(FetchPresentMembers(offset, limit));
+    attendanceBloc.add(FetchAbsentMembers(offset, limit));
     attendanceBloc.add(GetTotalNumberOfPresentMembers());
     attendanceBloc.add(GetTotalNumberOfAbsentMembers());
   }
 
   void _filterMembers(String query) {
-    setState(() {});
+    offset = 0; // Reset offset on new search
+    _showPresent == false
+        ? context
+            .read<AttendanceBloc>()
+            .add(FetchAbsentMembers(offset, limit, query))
+        : context
+            .read<AttendanceBloc>()
+            .add(FetchPresentMembers(offset, limit, query));
   }
 
   void _toggleSelection(int memberId) {
-    setState(() {
-      _showPresent == false
-          ? context.read<AttendanceBloc>().add(AddAttendance(memberId))
-          : null;
-    });
+    _showPresent == false
+        ? context.read<AttendanceBloc>().add(AddAttendance(memberId))
+        : context.read<AttendanceBloc>().add(RemoveAttendance(memberId));
   }
 
   @override
@@ -79,7 +90,7 @@ class _AttendancePageState extends State<AttendancePage> {
               children: [
                 TextField(
                   decoration: InputDecoration(
-                    hintText: 'Pretraži po imenu ili pojasu...',
+                    hintText: 'Pretraži po imenu ili prezimenu...',
                     prefixIcon: const Icon(Icons.search),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
@@ -98,7 +109,7 @@ class _AttendancePageState extends State<AttendancePage> {
                         });
                         context
                             .read<AttendanceBloc>()
-                            .add(FetchAbsentMembers(0, 5));
+                            .add(FetchAbsentMembers(offset, limit));
                       },
                       child: _StatBadge(
                         color: Colors.red,
@@ -113,7 +124,7 @@ class _AttendancePageState extends State<AttendancePage> {
                         _showPresent = true;
                         context
                             .read<AttendanceBloc>()
-                            .add(FetchPresentMembers(0, 5));
+                            .add(FetchPresentMembers(offset, limit));
                       },
                       child: _StatBadge(
                         color: Colors.green,
@@ -138,7 +149,6 @@ class _AttendancePageState extends State<AttendancePage> {
                 return _AttendanceCard(
                     member: member,
                     isSelected: _showPresent,
-                    selectMode: false,
                     onToggleSelect: () => _toggleSelection(member.id));
               },
             ),
@@ -153,13 +163,11 @@ class _AttendancePageState extends State<AttendancePage> {
 
 class _AttendanceCard extends StatelessWidget {
   final Member member;
-  final bool selectMode;
   final bool isSelected;
   final VoidCallback onToggleSelect;
 
   const _AttendanceCard(
       {required this.member,
-      required this.selectMode,
       required this.isSelected,
       required this.onToggleSelect});
 
@@ -169,23 +177,12 @@ class _AttendanceCard extends StatelessWidget {
       margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       color: isSelected ? Colors.blue[50] : null,
       child: InkWell(
-        onTap: selectMode ? onToggleSelect : null,
-        onLongPress: onToggleSelect,
         child: Padding(
           padding: const EdgeInsets.all(12),
           child: Row(
             children: [
-              if (selectMode)
-                Checkbox(
-                  value: isSelected,
-                  onChanged: (_) => onToggleSelect(),
-                ),
               CircleAvatar(
                 backgroundColor: _getBeltColor(member.beltColor),
-                child: Text(
-                  member.firstName[0],
-                  style: const TextStyle(color: Colors.white),
-                ),
               ),
               const SizedBox(width: 16),
               Expanded(
@@ -193,7 +190,7 @@ class _AttendanceCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      member.firstName,
+                      '${member.firstName} ${member.lastName}',
                       style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
                     Text(
@@ -211,9 +208,10 @@ class _AttendanceCard extends StatelessWidget {
                       : Icons.radio_button_unchecked,
                   color: isSelected == true ? Colors.green : Colors.grey,
                 ),
-                onPressed: selectMode ? null : null,
-                tooltip:
-                    isSelected == true ? 'Mark as Absent' : 'Mark as Present',
+                onPressed: onToggleSelect,
+                tooltip: isSelected == true
+                    ? 'Označi kao odsutnog'
+                    : 'Označi kao prisutnog',
               ),
             ],
           ),

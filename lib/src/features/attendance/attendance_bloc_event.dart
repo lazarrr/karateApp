@@ -12,13 +12,15 @@ class AddMember extends AttendanceEvent {
 class FetchPresentMembers extends AttendanceEvent {
   final int offset;
   final int limit;
-  FetchPresentMembers(this.offset, this.limit);
+  final String name;
+  FetchPresentMembers(this.offset, this.limit, [this.name = '']);
 }
 
 class FetchAbsentMembers extends AttendanceEvent {
   final int offset;
   final int limit;
-  FetchAbsentMembers(this.offset, this.limit);
+  final String name;
+  FetchAbsentMembers(this.offset, this.limit, [this.name = '']);
 }
 
 class GetTotalNumberOfPresentMembers extends AttendanceEvent {}
@@ -28,4 +30,9 @@ class GetTotalNumberOfAbsentMembers extends AttendanceEvent {}
 class AddAttendance extends AttendanceEvent {
   final int memberId;
   AddAttendance(this.memberId);
+}
+
+class RemoveAttendance extends AttendanceEvent {
+  final int memberId;
+  RemoveAttendance(this.memberId);
 }

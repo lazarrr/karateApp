@@ -1,5 +1,6 @@
 import 'package:karate_club_app/src/models/db/database_helper.dart';
 import 'package:karate_club_app/src/models/member.dart';
+import 'package:sqflite/sqflite.dart';
 
 class MemberRepository {
   final DatabaseHelper dbHelper;
@@ -13,9 +14,16 @@ class MemberRepository {
   }
 
   // Get all members
-  Future<List<Member>> getAllMembers() async {
+  Future<List<Member>> getAllMembers(
+      {int offset = 0, int limit = 5, String name = ''}) async {
     final db = await dbHelper.database;
-    final List<Map<String, dynamic>> maps = await db.query('members');
+    final List<Map<String, dynamic>> maps = await db.query(
+      'members',
+      where: name.isNotEmpty ? 'first_name LIKE ? OR last_name LIKE ?' : null,
+      whereArgs: name.isNotEmpty ? ['%$name%', '%$name%'] : null,
+      limit: limit,
+      offset: offset,
+    );
     return List.generate(maps.length, (i) => Member.fromMap(maps[i]));
   }
 
@@ -55,25 +63,11 @@ class MemberRepository {
     );
   }
 
-  // Search members by name
-  Future<List<Member>> searchMembers(String query) async {
+  Future<int> getTotalCountOfMembers() async {
     final db = await dbHelper.database;
-    final List<Map<String, dynamic>> maps = await db.query(
-      'members',
-      where: 'first_name LIKE ? OR last_name LIKE ?',
-      whereArgs: ['%$query%', '%$query%'],
+    final result = await db.rawQuery(
+      'SELECT COUNT(*) as count FROM members',
     );
-    return List.generate(maps.length, (i) => Member.fromMap(maps[i]));
-  }
-
-  // Filter members by belt color
-  Future<List<Member>> filterByBelt(String beltColor) async {
-    final db = await dbHelper.database;
-    final List<Map<String, dynamic>> maps = await db.query(
-      'members',
-      where: 'belt_color = ?',
-      whereArgs: [beltColor],
-    );
-    return List.generate(maps.length, (i) => Member.fromMap(maps[i]));
+    return Sqflite.firstIntValue(result) ?? 0;
   }
 }
