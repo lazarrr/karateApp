@@ -277,8 +277,21 @@ class _MembersListState extends State<MembersList> {
                   margin:
                       const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   child: ListTile(
-                    leading: CircleAvatar(
-                        backgroundColor: _getBeltColor(member.beltColor)),
+                    // Replace CircleAvatar with a colored belt strip
+                    leading: Container(
+                      width: 32,
+                      height: 32,
+                      alignment: Alignment.centerLeft,
+                      child: Container(
+                        width: 24,
+                        height: 8,
+                        decoration: BoxDecoration(
+                          color: _getBeltColor(member.beltColor),
+                          borderRadius: BorderRadius.circular(4),
+                          border: Border.all(color: Colors.black12, width: 1),
+                        ),
+                      ),
+                    ),
                     title: Text("${member.firstName} ${member.lastName}"),
                     subtitle: Text(_getBeltColorAsString(member.beltColor)),
                     trailing: Row(
