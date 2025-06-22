@@ -18,16 +18,19 @@ jobs:
           channel: stable
           cache: true
 
-      # Generate valid lowercase package name from repo name
+      # PowerShell-compatible package name derivation
       - name: Determine package name
         id: pkgname
+        shell: pwsh
         run: |
-          REPO_NAME=$(basename -s .git $(git config --get remote.origin.url))
-          PKG_NAME=$(echo "$REPO_NAME" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9_]/_/g')
-          echo "name=${PKG_NAME}" >> $GITHUB_OUTPUT
+          $url = git config --get remote.origin.url
+          $repo = $url -split '/' | Select-Object -Last 1
+          $repo = $repo -replace '\.git$',''
+          $pkg = $repo.ToLower() -replace '[^a-z0-9_]','_'
+          echo "name=$pkg" >> $env:GITHUB_OUTPUT
 
-      # Use the derived package name
       - name: Add Windows platform
+        shell: pwsh
         run: flutter create --platforms=windows --project-name ${{ steps.pkgname.outputs.name }} .
 
       - name: Install dependencies
@@ -44,10 +47,10 @@ jobs:
           retention-days: 7
 
       - name: Package release
+        shell: pwsh
         run: |
           cd build/windows/runner/Release
-          Compress-Archive -Path * -DestinationPath ${{ steps.pkgname.outputs.name }}_windows.zip
-        shell: pwsh
+          Compress-Archive -Path * -DestinationPath "${{ steps.pkgname.outputs.name }}_windows.zip"
 
       - name: Upload ZIP
         uses: actions/upload-artifact@v4
