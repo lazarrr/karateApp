@@ -19,7 +19,8 @@ class _AttendancePageState extends State<AttendancePage> {
   int presentCount = 0;
   int absentCount = 0;
   int offset = 0;
-  int limit = 5;
+  static const int _membersPerPage = 5;
+  int _totalUserCount = 0;
 
   @override
   void initState() {
@@ -52,8 +53,8 @@ class _AttendancePageState extends State<AttendancePage> {
 
   void _loadInitialData() {
     final attendanceBloc = context.read<AttendanceBloc>();
-    attendanceBloc.add(FetchPresentMembers(offset, limit));
-    attendanceBloc.add(FetchAbsentMembers(offset, limit));
+    attendanceBloc.add(FetchPresentMembers(offset, _membersPerPage));
+    attendanceBloc.add(FetchAbsentMembers(offset, _membersPerPage));
     attendanceBloc.add(GetTotalNumberOfPresentMembers());
     attendanceBloc.add(GetTotalNumberOfAbsentMembers());
   }
@@ -63,10 +64,10 @@ class _AttendancePageState extends State<AttendancePage> {
     _showPresent == false
         ? context
             .read<AttendanceBloc>()
-            .add(FetchAbsentMembers(offset, limit, query))
+            .add(FetchAbsentMembers(offset, _membersPerPage, query))
         : context
             .read<AttendanceBloc>()
-            .add(FetchPresentMembers(offset, limit, query));
+            .add(FetchPresentMembers(offset, _membersPerPage, query));
   }
 
   void _toggleSelection(int memberId) {
@@ -106,10 +107,11 @@ class _AttendancePageState extends State<AttendancePage> {
                       onTap: () async {
                         setState(() {
                           _showPresent = false;
+                          offset = 0; // Reset offset for absent members
                         });
                         context
                             .read<AttendanceBloc>()
-                            .add(FetchAbsentMembers(offset, limit));
+                            .add(FetchAbsentMembers(offset, _membersPerPage));
                       },
                       child: _StatBadge(
                         color: Colors.red,
@@ -122,9 +124,10 @@ class _AttendancePageState extends State<AttendancePage> {
                     GestureDetector(
                       onTap: () async {
                         _showPresent = true;
+                        offset = 0; // Reset offset for present members
                         context
                             .read<AttendanceBloc>()
-                            .add(FetchPresentMembers(offset, limit));
+                            .add(FetchPresentMembers(offset, _membersPerPage));
                       },
                       child: _StatBadge(
                         color: Colors.green,
@@ -153,9 +156,69 @@ class _AttendancePageState extends State<AttendancePage> {
               },
             ),
           ),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                TextButton(
+                  onPressed: offset > 0
+                      ? () => setState(() {
+                            offset -= _membersPerPage;
+                            _showPresent == true
+                                ? context
+                                    .read<AttendanceBloc>()
+                                    .add(FetchPresentMembers(
+                                      offset,
+                                      _membersPerPage,
+                                    ))
+                                : context
+                                    .read<AttendanceBloc>()
+                                    .add(FetchAbsentMembers(
+                                      offset,
+                                      _membersPerPage,
+                                    ));
+                          })
+                      : null,
+                  child: const Text('Prethodna'),
+                ),
+                Text('Strana ${(offset ~/ _membersPerPage) + 1}'),
+                TextButton(
+                  onPressed:
+                      (offset + 1) * _membersPerPage < returnTotalUserCount()
+                          ? () => setState(() {
+                                offset += _membersPerPage;
+                                _showPresent == true
+                                    ? context
+                                        .read<AttendanceBloc>()
+                                        .add(FetchPresentMembers(
+                                          offset,
+                                          _membersPerPage,
+                                        ))
+                                    : context
+                                        .read<AttendanceBloc>()
+                                        .add(FetchAbsentMembers(
+                                          offset,
+                                          _membersPerPage,
+                                        ));
+                              })
+                          : null,
+                  child: const Text('Sledeća'),
+                ),
+              ],
+            ),
+          )
         ],
       ),
     );
+  }
+
+  num returnTotalUserCount() {
+    if (_showPresent) {
+      return presentCount;
+    } else {
+      return absentCount;
+    }
   }
 }
 

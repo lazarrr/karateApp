@@ -172,7 +172,7 @@ class MembersList extends StatefulWidget {
 }
 
 class _MembersListState extends State<MembersList> {
-  late List<Member> members;
+  late List<Member> members = [];
   // int _currentPage = 0;
   int offset = 0;
   static const int _membersPerPage = 5;
