@@ -87,7 +87,7 @@ class MembersPage extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('Belt Color', style: TextStyle(fontSize: 16)),
+                  const Text('Boja pojasa', style: TextStyle(fontSize: 16)),
                   Wrap(
                     spacing: 8,
                     children: [
@@ -256,7 +256,7 @@ class _MembersListState extends State<MembersList> {
             padding: const EdgeInsets.all(8.0),
             child: TextField(
               decoration: InputDecoration(
-                hintText: 'Pretraži članove o imenu ili prezimenu...',
+                hintText: 'Pretraži članove po imenu ili prezimenu...',
                 prefixIcon: const Icon(Icons.search),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
@@ -506,11 +506,11 @@ void _showEditMemberDialog(BuildContext context, Member member) {
         TextButton(
           onPressed: () {
             final updatedMember = member.copyWith(
-              firstName: firstNameController.text,
-              lastName: lastNameController.text,
-              beltColor: beltController.text, dateOfBirth: DateTime.now(),
-              // You may want to update dateOfBirth instead of age
-            );
+                firstName: firstNameController.text,
+                lastName: lastNameController.text,
+                beltColor: beltController.text,
+                dateOfBirth: DateTime.now(),
+                email: mailController.text);
             context.read<MembersBloc>().add(UpdateMember(updatedMember));
             Navigator.pop(context);
           },
