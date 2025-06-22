@@ -1,54 +1,56 @@
 name: Build Windows
 on:
   push:
-    branches: [ main ]  # Trigger on pushes to main branch
-  workflow_dispatch:    # Allow manual triggers
+    branches: [ main ]
+  workflow_dispatch:
 
 jobs:
   build-windows:
-    runs-on: windows-latest  # Windows build environment
+    runs-on: windows-latest
 
     steps:
-      # Checkout code
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Set up Flutter
       - name: Install Flutter
         uses: subosito/flutter-action@v2
         with:
           channel: stable
-          cache: true  # Enable dependency caching
+          cache: true
 
-      # Ensure Windows support is configured
+      # Generate valid lowercase package name from repo name
+      - name: Determine package name
+        id: pkgname
+        run: |
+          REPO_NAME=$(basename -s .git $(git config --get remote.origin.url))
+          PKG_NAME=$(echo "$REPO_NAME" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9_]/_/g')
+          echo "name=${PKG_NAME}" >> $GITHUB_OUTPUT
+
+      # Use the derived package name
       - name: Add Windows platform
-        run: flutter create --platforms=windows --project-name MyApp .
+        run: flutter create --platforms=windows --project-name ${{ steps.pkgname.outputs.name }} .
 
-      # Get dependencies
       - name: Install dependencies
         run: flutter pub get
 
-      # Build Windows release
       - name: Build Windows executable
         run: flutter build windows --release
 
-      # Upload artifact
       - name: Upload Windows build
         uses: actions/upload-artifact@v4
         with:
           name: WindowsApp
           path: build/windows/runner/Release/
-          retention-days: 7  # Auto-delete after 1 week
+          retention-days: 7
 
-      # (Optional) Create ZIP archive
       - name: Package release
         run: |
           cd build/windows/runner/Release
-          Compress-Archive -Path * -DestinationPath MyApp_Windows.zip
+          Compress-Archive -Path * -DestinationPath ${{ steps.pkgname.outputs.name }}_windows.zip
         shell: pwsh
 
       - name: Upload ZIP
         uses: actions/upload-artifact@v4
         with:
-          name: MyApp_Windows
-          path: build/windows/runner/Release/MyApp_Windows.zip
+          name: ${{ steps.pkgname.outputs.name }}_windows
+          path: build/windows/runner/Release/${{ steps.pkgname.outputs.name }}_windows.zip
