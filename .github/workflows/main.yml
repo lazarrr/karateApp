@@ -1,26 +1,64 @@
 name: Build Windows
-on: push  # Runs on every push (adjust as needed)
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
 
 jobs:
-  build:
-    runs-on: windows-latest  # Windows VM provided by GitHub
+  build-windows:
+    runs-on: windows-latest
+
     steps:
-      # Checkout code (v4 is the latest)
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      # Set up Flutter
-      - uses: subosito/flutter-action@v2
+      - name: Install Flutter
+        uses: subosito/flutter-action@v2
         with:
-          channel: stable  # Use Flutter stable
+          channel: stable
+          cache: true
 
-      # Install dependencies
-      - run: flutter pub get
+      - name: Determine package name
+        id: pkgname
+        shell: pwsh
+        run: |
+          $url = git config --get remote.origin.url
+          $repo = $url -split '/' | Select-Object -Last 1
+          $repo = $repo -replace '\.git$',''
+          $pkg = $repo.ToLower() -replace '[^a-z0-9_]','_'
+          echo "name=$pkg" >> $env:GITHUB_OUTPUT
 
-      # Build Windows release
-      - run: flutter build windows --release
+      - name: Add Windows platform
+        shell: pwsh
+        run: flutter create --platforms=windows --project-name ${{ steps.pkgname.outputs.name }} .
 
-      # Upload the build artifacts (EXE + DLLs) using v4
-      - uses: actions/upload-artifact@v4
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build Windows executable
+        run: flutter build windows --release
+
+      - name: Verify build location
+        shell: pwsh
+        run: |
+          ls build/windows -Recurse
+          echo "Build output exists at build/windows/x64/runner/Release/"
+
+      - name: Upload Windows build
+        uses: actions/upload-artifact@v4
         with:
           name: WindowsApp
-          path: build/windows/runner/Release/
+          path: build/windows/x64/runner/Release/
+          retention-days: 7
+
+      - name: Package release
+        shell: pwsh
+        run: |
+          cd build/windows/x64/runner/Release
+          Compress-Archive -Path * -DestinationPath "${{ steps.pkgname.outputs.name }}_windows.zip"
+
+      - name: Upload ZIP
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.pkgname.outputs.name }}_windows
+          path: build/windows/x64/runner/Release/${{ steps.pkgname.outputs.name }}_windows.zip
