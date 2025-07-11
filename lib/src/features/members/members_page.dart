@@ -34,7 +34,7 @@ class MembersPage extends StatelessWidget {
   }
 
   void _showAddMemberDialog(BuildContext context) {
-    final nameController = TextEditingController();
+    final firstNameController = TextEditingController();
     final lastNameController = TextEditingController();
     final beltController = TextEditingController();
     final ageController = TextEditingController();
@@ -48,7 +48,7 @@ class MembersPage extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             TextField(
-              controller: nameController,
+              controller: firstNameController,
               decoration: const InputDecoration(labelText: 'Ime'),
             ),
             TextField(
@@ -146,9 +146,19 @@ class MembersPage extends StatelessWidget {
           ),
           TextButton(
             onPressed: () {
+              if (firstNameController.text.isEmpty ||
+                  lastNameController.text.isEmpty ||
+                  beltController.text.isEmpty ||
+                  ageController.text.isEmpty ||
+                  mailController.text.isEmpty) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Sva polja su obavezna!')),
+                );
+                return;
+              }
               final newMember = Member(
                   id: DateTime.now().millisecondsSinceEpoch,
-                  firstName: nameController.text,
+                  firstName: firstNameController.text,
                   beltColor: beltController.text,
                   lastName: lastNameController.text,
                   dateOfBirth: DateTime.now(),
@@ -417,99 +427,102 @@ void _showEditMemberDialog(BuildContext context, Member member) {
   showDialog(
     context: context,
     builder: (context) => AlertDialog(
-      title: const Text('Edit Member'),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          TextField(
-            controller: firstNameController,
-            decoration: const InputDecoration(labelText: 'Ime'),
-          ),
-          TextField(
-            controller: lastNameController,
-            decoration: const InputDecoration(labelText: 'Prezime'),
-          ),
-          TextField(
-            controller: mailController,
-            decoration: const InputDecoration(labelText: 'Email'),
-          ),
-          GestureDetector(
-            onTap: () async {
-              final pickedDate = await showDatePicker(
-                context: context,
-                initialDate:
-                    DateTime.now().subtract(const Duration(days: 365 * 18)),
-                firstDate: DateTime(1950),
-                lastDate: DateTime.now(),
-              );
-              if (pickedDate != null) {
-                ageController.text = "${pickedDate.toLocal()}".split(' ')[0];
-              }
-            },
-            child: AbsorbPointer(
-              child: TextField(
-                controller: ageController,
-                decoration: const InputDecoration(
-                  labelText: 'Datum rođenja',
-                  hintText: 'Izaberite datum rođenja',
+      title: const Text('Izmeni člana'),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: firstNameController,
+              decoration: const InputDecoration(labelText: 'Ime'),
+            ),
+            TextField(
+              controller: lastNameController,
+              decoration: const InputDecoration(labelText: 'Prezime'),
+            ),
+            TextField(
+              controller: mailController,
+              decoration: const InputDecoration(labelText: 'Email'),
+            ),
+            GestureDetector(
+              onTap: () async {
+                final pickedDate = await showDatePicker(
+                  context: context,
+                  initialDate:
+                      DateTime.now().subtract(const Duration(days: 365 * 18)),
+                  firstDate: DateTime(1950),
+                  lastDate: DateTime.now(),
+                );
+                if (pickedDate != null) {
+                  ageController.text = "${pickedDate.toLocal()}".split(' ')[0];
+                }
+              },
+              child: AbsorbPointer(
+                child: TextField(
+                  controller: ageController,
+                  decoration: const InputDecoration(
+                    labelText: 'Datum rođenja',
+                    hintText: 'Izaberite datum rođenja',
+                  ),
                 ),
               ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text('Boja pojasa', style: TextStyle(fontSize: 16)),
-                Wrap(
-                  spacing: 8,
-                  children: [
-                    for (final color in beltColors)
-                      ChoiceChip(
-                        label: Text(() {
-                          switch (color) {
-                            case 'white':
-                              return 'Bela';
-                            case 'yellow':
-                              return 'Žuta';
-                            case 'orange':
-                              return 'Narandžasta';
-                            case 'green':
-                              return 'Zelena';
-                            case 'blue':
-                              return 'Plava';
-                            case 'brown':
-                              return 'Braon';
-                            case 'black':
-                              return 'Crni';
-                            default:
-                              return color[0].toUpperCase() +
-                                  color.substring(1);
-                          }
-                        }()),
-                        selected: beltController.text == color,
-                        selectedColor: _getBeltColor(color).withOpacity(0.7),
-                        backgroundColor: Colors.grey[200],
-                        labelStyle: TextStyle(
-                          color: beltController.text == color
-                              ? Colors.white
-                              : Colors.black,
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text('Boja pojasa', style: TextStyle(fontSize: 16)),
+                  Wrap(
+                    spacing: 8,
+                    children: [
+                      for (final color in beltColors)
+                        ChoiceChip(
+                          label: Text(() {
+                            switch (color) {
+                              case 'white':
+                                return 'Bela';
+                              case 'yellow':
+                                return 'Žuta';
+                              case 'orange':
+                                return 'Narandžasta';
+                              case 'green':
+                                return 'Zelena';
+                              case 'blue':
+                                return 'Plava';
+                              case 'brown':
+                                return 'Braon';
+                              case 'black':
+                                return 'Crni';
+                              default:
+                                return color[0].toUpperCase() +
+                                    color.substring(1);
+                            }
+                          }()),
+                          selected: beltController.text == color,
+                          selectedColor: _getBeltColor(color).withOpacity(0.7),
+                          backgroundColor: Colors.grey[200],
+                          labelStyle: TextStyle(
+                            color: beltController.text == color
+                                ? Colors.white
+                                : Colors.black,
+                          ),
+                          onSelected: (selected) {
+                            if (selected) {
+                              beltController.text = color;
+                              // Force rebuild to update selection
+                              (context as Element).markNeedsBuild();
+                            }
+                          },
                         ),
-                        onSelected: (selected) {
-                          if (selected) {
-                            beltController.text = color;
-                            // Force rebuild to update selection
-                            (context as Element).markNeedsBuild();
-                          }
-                        },
-                      ),
-                  ],
-                ),
-              ],
+                    ],
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
       actions: [
         TextButton(
@@ -518,18 +531,31 @@ void _showEditMemberDialog(BuildContext context, Member member) {
         ),
         TextButton(
           onPressed: () {
+            if (firstNameController.text.isEmpty ||
+                lastNameController.text.isEmpty ||
+                beltController.text.isEmpty ||
+                ageController.text.isEmpty ||
+                mailController.text.isEmpty) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Sva polja su obavezna!')),
+              );
+              return;
+            }
             final updatedMember = member.copyWith(
-                firstName: firstNameController.text,
-                lastName: lastNameController.text,
-                beltColor: beltController.text,
-                dateOfBirth: DateTime.now(),
-                email: mailController.text);
+              firstName: firstNameController.text,
+              lastName: lastNameController.text,
+              beltColor: beltController.text,
+              dateOfBirth:
+                  DateTime.tryParse(ageController.text) ?? DateTime.now(),
+              email: mailController.text,
+            );
             context.read<MembersBloc>().add(UpdateMember(updatedMember));
             Navigator.pop(context);
           },
           child: const Text('Sačuvaj', style: TextStyle(color: Colors.blue)),
         ),
       ],
+      scrollable: true,
     ),
   );
 }

@@ -24,8 +24,8 @@ class AttendanceRepository {
       SELECT COUNT(*) as count
       FROM members m
       LEFT JOIN attendance a
-        ON m.id = a.member_id AND a.date = ?
-      WHERE a.status IS NULL OR a.status = 0
+        ON m.id = a.member_id
+      WHERE (a.status IS NULL OR a.status = 0) and (a.date IS NULL OR a.date = ?)
     ''', [currentDate.toIso8601String().split('T').first]);
     return Sqflite.firstIntValue(result) ?? 0;
   }
