@@ -50,14 +50,21 @@ class MyApp extends StatelessWidget {
       ),
       home: Stack(
         children: [
-          // Background image
+          // ❶ WHITE “canvas” – drawn first
+          Positioned.fill(
+            child: Container(color: Colors.white),
+          ),
+
+          // ❷ Your logo – drawn on top of the white canvas
           Positioned.fill(
             child: Image.asset(
               'assets/logo.jpeg',
-              fit: BoxFit.fitWidth,
+              fit: BoxFit.fitWidth, // keep if you want the full logo in view
+              alignment: Alignment.center, // optional: pin it to the top
             ),
           ),
-          // Main content
+
+          // ❸ Main content – drawn last
           const MainNavigation(),
         ],
       ),

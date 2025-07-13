@@ -51,6 +51,7 @@ dependencies:
   cupertino_icons: ^1.0.6
   provider: ^6.1.5
   table_calendar: ^3.0.9
+  flutter_launcher_icons: ^0.14.4
 
 dev_dependencies:
   flutter_test:
@@ -65,7 +66,10 @@ dev_dependencies:
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
-
+flutter_launcher_icons:
+  image_path: "assets/logo.jpeg"    # <-- your custom icon path
+  android: true
+  ios: true
 # The following section is specific to Flutter packages.
 flutter:
 
@@ -81,6 +85,8 @@ flutter:
   
   assets:
     - assets/logo.jpeg
+
+
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
