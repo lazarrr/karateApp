@@ -242,8 +242,19 @@ class _AttendanceCard extends StatelessWidget {
           padding: const EdgeInsets.all(12),
           child: Row(
             children: [
-              CircleAvatar(
-                backgroundColor: _getBeltColor(member.beltColor),
+              Container(
+                width: 32,
+                height: 32,
+                alignment: Alignment.centerLeft,
+                child: Container(
+                  width: 24,
+                  height: 8,
+                  decoration: BoxDecoration(
+                    color: _getBeltColor(member.beltColor),
+                    borderRadius: BorderRadius.circular(4),
+                    border: Border.all(color: Colors.black12, width: 1),
+                  ),
+                ),
               ),
               const SizedBox(width: 16),
               Expanded(

@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:karate_club_app/src/features/members/members_bloc.dart';
 import 'package:karate_club_app/src/features/members/members_bloc_event.dart';
 import 'package:karate_club_app/src/features/members/members_bloc_state.dart';
+import 'package:karate_club_app/src/features/members/widgets/attendance_calendar.dart';
 import 'package:karate_club_app/src/models/member.dart';
 
 class MembersPage extends StatelessWidget {
@@ -183,7 +184,6 @@ class MembersList extends StatefulWidget {
 
 class _MembersListState extends State<MembersList> {
   late List<Member> members = [];
-  // int _currentPage = 0;
   int offset = 0;
   static const int _membersPerPage = 5;
   int _totalUserCount = 0;
@@ -304,42 +304,91 @@ class _MembersListState extends State<MembersList> {
                     ),
                     title: Text("${member.firstName} ${member.lastName}"),
                     subtitle: Text(_getBeltColorAsString(member.beltColor)),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        IconButton(
-                          icon: const Icon(Icons.edit, color: Colors.blue),
-                          onPressed: () =>
-                              _showEditMemberDialog(context, member),
+                    trailing: PopupMenuButton<int>(
+                      icon: const Icon(Icons.more_vert),
+                      itemBuilder: (context) => [
+                        const PopupMenuItem(
+                          value: 0,
+                          child: Row(
+                            children: [
+                              Icon(Icons.edit, color: Colors.blue),
+                              SizedBox(width: 8),
+                              Text('Izmeni'),
+                            ],
+                          ),
                         ),
-                        IconButton(
-                            icon: const Icon(Icons.delete, color: Colors.red),
-                            onPressed: () => showDialog(
-                                  context: context,
-                                  builder: (context) => AlertDialog(
-                                    title: const Text('Da li ste sigurni?'),
-                                    content: const Text(
-                                        'Želite li da obrišete ovog člana?'),
-                                    actions: [
-                                      TextButton(
-                                        onPressed: () => Navigator.pop(context),
-                                        child: const Text('Odustani'),
-                                      ),
-                                      TextButton(
-                                        onPressed: () {
-                                          Navigator.pop(context);
-                                          context
-                                              .read<MembersBloc>()
-                                              .add(DeleteMember(member.id));
-                                        },
-                                        child: const Text('Obriši',
-                                            style:
-                                                TextStyle(color: Colors.red)),
-                                      ),
-                                    ],
-                                  ),
-                                )),
+                        const PopupMenuItem(
+                          value: 1,
+                          child: Row(
+                            children: [
+                              Icon(Icons.delete, color: Colors.red),
+                              SizedBox(width: 8),
+                              Text('Obriši'),
+                            ],
+                          ),
+                        ),
+                        const PopupMenuItem(
+                          value: 2,
+                          child: Row(
+                            children: [
+                              Icon(Icons.calendar_month, color: Colors.green),
+                              SizedBox(width: 8),
+                              Text('Pregled dolaska'),
+                            ],
+                          ),
+                        )
                       ],
+                      onSelected: (value) {
+                        if (value == 0) {
+                          _showEditMemberDialog(context, member);
+                        } else if (value == 1) {
+                          showDialog(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                              title: const Text('Da li ste sigurni?'),
+                              content: const Text(
+                                  'Želite li da obrišete ovog člana?'),
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Navigator.pop(context),
+                                  child: const Text('Odustani'),
+                                ),
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.pop(context);
+                                    context
+                                        .read<MembersBloc>()
+                                        .add(DeleteMember(member.id));
+                                  },
+                                  child: const Text('Obriši',
+                                      style: TextStyle(color: Colors.red)),
+                                ),
+                              ],
+                            ),
+                          );
+                        } else if (value == 2) {
+                          showDialog(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                              contentPadding: EdgeInsets.zero,
+                              content: SingleChildScrollView(
+                                child: SizedBox(
+                                  width: 330,
+                                  height: 540, // You can adjust this
+                                  child: AttendanceCalendarDialog(
+                                      memberId: members[index].id),
+                                ),
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Navigator.pop(context),
+                                  child: const Text('Zatvori'),
+                                ),
+                              ],
+                            ),
+                          );
+                        }
+                      },
                     ),
                   ),
                 );

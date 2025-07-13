@@ -22,6 +22,12 @@ class AbsentMembersLoaded extends AttendanceState {
   AbsentMembersLoaded(super.attendance);
 }
 
+class AttendanceFetchedForMonth extends AttendanceState {
+  final List<DateTime> attendanceDates;
+
+  AttendanceFetchedForMonth(this.attendanceDates) : super([]);
+}
+
 class AttendanceError extends AttendanceState {
   final String message;
   AttendanceError(this.message) : super([]);

@@ -23,6 +23,12 @@ class FetchAbsentMembers extends AttendanceEvent {
   FetchAbsentMembers(this.offset, this.limit, [this.name = '']);
 }
 
+class FetchAttendanceForMonth extends AttendanceEvent {
+  final int memberId;
+  final DateTime month;
+  FetchAttendanceForMonth(this.memberId, this.month);
+}
+
 class GetTotalNumberOfPresentMembers extends AttendanceEvent {}
 
 class GetTotalNumberOfAbsentMembers extends AttendanceEvent {}

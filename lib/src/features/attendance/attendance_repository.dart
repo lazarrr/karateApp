@@ -137,4 +137,24 @@ class AttendanceRepository {
       });
     }
   }
+
+  Future<List<DateTime>> fetchAttendanceForMonth(
+      int memberId, DateTime month) async {
+    final db = await dbHelper.database;
+    final year = month.year;
+    final monthNum = month.month.toString().padLeft(2, '0');
+    final startDate = '$year-$monthNum-01';
+    final endDate =
+        DateTime(year, month.month + 1, 0).toIso8601String().split('T').first;
+
+    final result = await db.query(
+      'attendance',
+      columns: ['date'],
+      where: 'member_id = ? AND date >= ? AND date <= ? AND status = 1',
+      whereArgs: [memberId, startDate, endDate],
+      orderBy: 'date ASC',
+    );
+
+    return result.map((row) => DateTime.parse(row['date'] as String)).toList();
+  }
 }

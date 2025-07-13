@@ -13,6 +13,21 @@ class AttendanceBloc extends Bloc<AttendanceEvent, AttendanceState> {
     on<GetTotalNumberOfAbsentMembers>(_onGetTotalNumberOfAbsentMembers);
     on<AddAttendance>(_onAddAttendance);
     on<RemoveAttendance>(_onRemoveAttendance);
+    on<FetchAttendanceForMonth>(_onFetchAttendanceForMonth);
+  }
+
+  Future<void> _onFetchAttendanceForMonth(
+    FetchAttendanceForMonth event,
+    Emitter<AttendanceState> emit,
+  ) async {
+    emit(AttendanceLoading([]));
+    try {
+      final attendanceDates =
+          await repository.fetchAttendanceForMonth(event.memberId, event.month);
+      emit(AttendanceFetchedForMonth(attendanceDates));
+    } catch (e) {
+      emit(AttendanceError('Failed to fetch attendance for month'));
+    }
   }
 
   Future<void> _onGetTotalNumberOfAbsentMembers(
