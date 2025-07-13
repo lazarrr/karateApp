@@ -42,10 +42,25 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Karate Club',
-      home: MainNavigation(),
+      theme: ThemeData(
+        scaffoldBackgroundColor: Colors.transparent, // 👈 one‑liner
+      ),
+      home: Stack(
+        children: [
+          // Background image
+          Positioned.fill(
+            child: Image.asset(
+              'assets/logo.jpeg',
+              fit: BoxFit.fitWidth,
+            ),
+          ),
+          // Main content
+          const MainNavigation(),
+        ],
+      ),
     );
   }
 }
