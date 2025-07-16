@@ -5,6 +5,7 @@ import 'package:karate_club_app/src/features/turnament/tournament_bloc_event.dar
 import 'package:karate_club_app/src/features/turnament/tournament_bloc_state.dart';
 import 'package:karate_club_app/src/features/turnament/tournametn_bloc.dart';
 import 'package:karate_club_app/src/features/turnament/widgets/add_members_to_tournaments.dart';
+import 'package:karate_club_app/src/models/member.dart';
 import 'package:karate_club_app/src/models/turnament.dart';
 
 class TournamentsPage extends StatelessWidget {
@@ -201,7 +202,7 @@ class _TournamentsListState extends State<_TournamentsList> {
                         ),
                       )
                     ],
-                    onSelected: (value) {
+                    onSelected: (value) async {
                       if (value == 0) {
                         // Call the dialog from the parent widget
                         (context.findAncestorWidgetOfExactType<
@@ -233,24 +234,40 @@ class _TournamentsListState extends State<_TournamentsList> {
                           ),
                         );
                       } else if (value == 2) {
-                        showDialog(
-                          context: context,
-                          builder: (context) => AlertDialog(
-                            contentPadding: EdgeInsets.zero,
-                            content: const SingleChildScrollView(
-                              child: SizedBox(
-                                  width: 330,
-                                  height: 540, // You can adjust this
-                                  child: AddMembersToTournament()),
+                        // fetch selected members
+                        final bloc = context.read<TournamentsBloc>();
+                        bloc.add(GetMembersOfTournament(t.id));
+
+                        // Wait for the response from the bloc
+                        List<Member> currentMembers = [];
+                        final subscription = bloc.stream.listen((state) {
+                          if (state is MembersOfTournamentLoaded) {
+                            currentMembers = state.members;
+                          }
+                        });
+
+                        // Wait a short moment for the bloc to emit the state
+                        await Future.delayed(const Duration(milliseconds: 200));
+                        await subscription.cancel();
+
+                        final selectedMembers =
+                            await Navigator.push<List<Member>>(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => AddMembersToTournamentPage(
+                              initiallySelectedMembers: currentMembers,
                             ),
-                            actions: [
-                              TextButton(
-                                onPressed: () => Navigator.pop(context),
-                                child: const Text('Zatvori'),
-                              ),
-                            ],
                           ),
                         );
+
+                        if (selectedMembers != null) {
+                          // Do something with the selected members
+                          context.read<TournamentsBloc>().add(
+                                AddMembersToTournament(
+                                    selectedMembers.map((m) => m.id).toList(),
+                                    t.id),
+                              );
+                        }
                       }
                     },
                   ),

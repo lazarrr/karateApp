@@ -12,6 +12,40 @@ class TournamentsBloc extends Bloc<TournamentsEvent, TournamentsState> {
     on<UpdateTournament>(_onUpdateTournament);
     on<DeleteTournament>(_onDeleteTournament);
     on<GetTotalCountOfTournaments>(_onGetTotalCount);
+    on<AddMembersToTournament>(_onAddMembersToTournament);
+    on<GetMembersOfTournament>(_onGetMembersOfTournament);
+  }
+
+  /* ──────────────────────────────  get members of tournament  ───────────────────────── */
+
+  Future<void> _onGetMembersOfTournament(
+    GetMembersOfTournament event,
+    Emitter<TournamentsState> emit,
+  ) async {
+    try {
+      final members =
+          await repository.getMembersOfTournament(event.tournamentId);
+      emit(MembersOfTournamentLoaded(members));
+    } catch (e) {
+      emit(TournamentsError('Failed to load members of tournament'));
+    }
+  }
+
+  /* ──────────────────────────────  add members to tournament  ───────────────────────── */
+
+  Future<void> _onAddMembersToTournament(
+    AddMembersToTournament event,
+    Emitter<TournamentsState> emit,
+  ) async {
+    try {
+      await repository.addMembersToTournament(
+        event.tournamentId,
+        event.membersIds,
+      );
+      emit(MembersAddedToTournament());
+    } catch (e) {
+      emit(TournamentsError('Failed to add members to tournament'));
+    }
   }
 
   /* ──────────────────────────────  total count  ───────────────────────── */

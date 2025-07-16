@@ -25,6 +25,13 @@ class AddTournament extends TournamentsEvent {
   AddTournament(this.tournament);
 }
 
+class AddMembersToTournament extends TournamentsEvent {
+  final List<int> membersIds;
+  final int tournamentId;
+
+  AddMembersToTournament(this.membersIds, this.tournamentId);
+}
+
 /// Update an existing tournament
 class UpdateTournament extends TournamentsEvent {
   final Tournament tournament;
@@ -35,4 +42,10 @@ class UpdateTournament extends TournamentsEvent {
 class DeleteTournament extends TournamentsEvent {
   final int tournamentId;
   DeleteTournament(this.tournamentId);
+}
+
+class GetMembersOfTournament extends TournamentsEvent {
+  final int tournamentId;
+
+  GetMembersOfTournament(this.tournamentId);
 }

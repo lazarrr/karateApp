@@ -1,4 +1,5 @@
 import 'package:karate_club_app/src/models/db/database_helper.dart';
+import 'package:karate_club_app/src/models/member.dart';
 import 'package:karate_club_app/src/models/turnament.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -55,5 +56,34 @@ class TournamentsRepository {
     final db = await dbHelper.database;
     final res = await db.rawQuery('SELECT COUNT(*) AS count FROM tournaments');
     return Sqflite.firstIntValue(res) ?? 0;
+  }
+
+  /// Add members to a tournament
+  Future<void> addMembersToTournament(
+      int tournamentId, List<int> memberIds) async {
+    final db = await dbHelper.database;
+    final batch = db.batch();
+    for (final memberId in memberIds) {
+      batch.insert(
+        'tournament_participants',
+        {
+          'tournament_id': tournamentId,
+          'member_id': memberId,
+        },
+        conflictAlgorithm: ConflictAlgorithm.ignore,
+      );
+    }
+    await batch.commit(noResult: true);
+  }
+
+  /// Get all member IDs of a tournament
+  Future<List<Member>> getMembersOfTournament(int tournamentId) async {
+    final db = await dbHelper.database;
+    final rows = await db.rawQuery('''
+      SELECT m.* FROM members m
+      INNER JOIN tournament_participants tp ON m.id = tp.member_id
+      WHERE tp.tournament_id = ?
+    ''', [tournamentId]);
+    return rows.map((row) => Member.fromMap(row)).toList();
   }
 }
