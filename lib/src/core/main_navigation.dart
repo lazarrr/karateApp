@@ -4,6 +4,7 @@ import 'package:karate_club_app/src/features/attendance/attendance_bloc.dart';
 import 'package:karate_club_app/src/features/attendance/attendance_bloc_event.dart';
 import 'package:karate_club_app/src/features/attendance/attendance_page.dart';
 import 'package:karate_club_app/src/features/members/members_page.dart';
+import 'package:karate_club_app/src/features/turnament/tournament_page.dart';
 
 class MainNavigation extends StatefulWidget {
   const MainNavigation({super.key});
@@ -18,6 +19,7 @@ class _MainNavigationState extends State<MainNavigation> {
   final List<Widget> _pages = [
     const MembersPage(),
     const AttendancePage(),
+    const TournamentsPage()
   ];
 
   @override
@@ -40,6 +42,7 @@ class _MainNavigationState extends State<MainNavigation> {
           BottomNavigationBarItem(icon: Icon(Icons.people), label: 'Članovi'),
           BottomNavigationBarItem(
               icon: Icon(Icons.calendar_today), label: 'Prisustva'),
+          BottomNavigationBarItem(icon: Icon(Icons.flag), label: 'Turniri'),
         ],
       ),
     );

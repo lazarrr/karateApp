@@ -6,6 +6,8 @@ import 'package:karate_club_app/src/features/attendance/attendance_repository.da
 import 'package:karate_club_app/src/features/members/members_bloc.dart';
 import 'package:karate_club_app/src/features/members/members_bloc_event.dart';
 import 'package:karate_club_app/src/features/members/members_repository.dart';
+import 'package:karate_club_app/src/features/turnament/tournament_repository.dart';
+import 'package:karate_club_app/src/features/turnament/tournametn_bloc.dart';
 import 'package:karate_club_app/src/models/db/database_helper.dart';
 import 'package:provider/provider.dart';
 
@@ -16,12 +18,14 @@ void main() async {
   final dbHelper = DatabaseHelper.instance;
   final memberRepo = MemberRepository(dbHelper);
   final attendanceRepo = AttendanceRepository(dbHelper);
+  final tournament = TournamentsRepository(dbHelper);
 
   runApp(
     MultiProvider(
       providers: [
         Provider<MemberRepository>.value(value: memberRepo),
         Provider<AttendanceRepository>.value(value: attendanceRepo),
+        Provider<TournamentsRepository>.value(value: tournament),
         BlocProvider<MembersBloc>(
           create: (context) => MembersBloc(
             context.read<MemberRepository>(),
@@ -31,6 +35,10 @@ void main() async {
             create: (context) => AttendanceBloc(
                   context.read<AttendanceRepository>(),
                 )),
+        BlocProvider<TournamentsBloc>(
+            create: (context) => TournamentsBloc(
+                  context.read<TournamentsRepository>(),
+                ))
       ],
       child: const MyApp(),
     ),

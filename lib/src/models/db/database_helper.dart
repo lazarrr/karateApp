@@ -14,7 +14,7 @@ class DatabaseHelper {
   Future<Database> get database async => _database ??= await _initDatabase();
 
   Future<Database> _initDatabase() async {
-    // await deleteDatabase(join(await getDatabasesPath(), _databaseName));
+    //await deleteDatabase(join(await getDatabasesPath(), _databaseName));
     final databasesPath = await getDatabasesPath();
     final path = join(databasesPath, _databaseName);
 
@@ -56,6 +56,25 @@ class DatabaseHelper {
         date TEXT NOT NULL,
         notes TEXT,
         FOREIGN KEY (member_id) REFERENCES members (id) ON DELETE CASCADE
+      )
+    ''');
+
+    await db.execute('''
+      CREATE TABLE tournaments (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        location TEXT NOT NULL,
+        date TEXT NOT NULL
+      )
+    ''');
+
+    await db.execute('''
+      CREATE TABLE tournament_participants (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        member_id INTEGER NOT NULL,
+        tournament_id INTEGER NOT NULL,
+        FOREIGN KEY (member_id) REFERENCES members (id) ON DELETE CASCADE,
+        FOREIGN KEY (tournament_id) REFERENCES tournaments (id) ON DELETE CASCADE
       )
     ''');
   }
