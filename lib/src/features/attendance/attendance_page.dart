@@ -19,7 +19,7 @@ class _AttendancePageState extends State<AttendancePage> {
   int presentCount = 0;
   int absentCount = 0;
   int offset = 0;
-  static const int _membersPerPage = 5;
+  static const int _membersPerPage = 7;
   @override
   void initState() {
     super.initState();
@@ -337,19 +337,33 @@ class _StatBadge extends StatelessWidget {
 
 Color _getBeltColor(String beltColor) {
   switch (beltColor.toLowerCase()) {
-    case 'black':
-      return Colors.black;
-    case 'brown':
-      return Colors.brown;
+    case 'white':
+      return Colors.grey; // Beli
     case 'blue':
-      return Colors.blue;
-    case 'green':
-      return Colors.green;
-    case 'orange':
-      return Colors.orange;
+      return const Color(0xFF2196F3); // Plavi
+    case 'brown':
+      return const Color(0xFF795548); // Braon
     case 'yellow':
-      return Colors.yellow;
+      return const Color(0xFFFFEB3B); // Žuti
+    case 'orange':
+      return const Color(0xFFFF9800); // Narandžasti
+    case 'red':
+      return const Color(0xFFF44336); // Crveni
+    case 'green':
+      return const Color(0xFF4CAF50); // Zeleni
+    case 'light_blue':
+      return const Color(0xFF81D4FA); // Svetlo plavi
+    case 'dark_blue':
+      return const Color(0xFF1565C0); // Tamno plavi
+    case 'purple':
+      return const Color(0xFF9C27B0); // Ljubičasti
+    case 'light_brown':
+      return const Color(0xFFBCAAA4); // Svetlo braon
+    case 'dark_brown':
+      return const Color(0xFF5D4037); // Tamno braon
+    case 'black':
+      return Colors.black; // Crni
     default:
-      return Colors.grey;
+      return Colors.purple;
   }
 }

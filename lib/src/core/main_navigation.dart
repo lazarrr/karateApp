@@ -35,7 +35,11 @@ class _MainNavigationState extends State<MainNavigation> {
         onTap: (index) {
           setState(() {
             _currentIndex = index;
-            context.read<AttendanceBloc>().add(FetchAbsentMembers(0, 5));
+            context.read<AttendanceBloc>().add(FetchAbsentMembers(0, 8));
+            context.read<AttendanceBloc>().add(GetTotalNumberOfAbsentMembers());
+            context
+                .read<AttendanceBloc>()
+                .add(GetTotalNumberOfPresentMembers());
           });
         },
         items: const [

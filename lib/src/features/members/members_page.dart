@@ -234,6 +234,8 @@ class _MembersListState extends State<MembersList> {
 
   Color _getBeltColor(String beltColor) {
     switch (beltColor.toLowerCase()) {
+      case 'white':
+        return Colors.grey; // Beli
       case 'yellow':
         return const Color(0xFFFFEB3B); // Žuti
       case 'orange':
@@ -254,8 +256,6 @@ class _MembersListState extends State<MembersList> {
         return const Color(0xFF5D4037); // Tamno braon
       case 'black':
         return Colors.black; // Crni
-      case 'white':
-        return Colors.grey;
       default:
         return Colors.purple;
     }
@@ -468,7 +468,7 @@ class _MembersListState extends State<MembersList> {
 Color _getBeltColor(String beltColor) {
   switch (beltColor.toLowerCase()) {
     case 'white':
-      return Colors.white; // Beli
+      return Colors.grey; // Beli
     case 'blue':
       return const Color(0xFF2196F3); // Plavi
     case 'brown':
@@ -493,8 +493,6 @@ Color _getBeltColor(String beltColor) {
       return const Color(0xFF5D4037); // Tamno braon
     case 'black':
       return Colors.black; // Crni
-    case 'white':
-      return Colors.grey;
     default:
       return Colors.purple;
   }

@@ -25,13 +25,14 @@ class AttendanceRepository {
       FROM members m
       LEFT JOIN attendance a
         ON m.id = a.member_id
-      WHERE (a.status IS NULL OR a.status = 0) and (a.date IS NULL OR a.date = ?)
+      WHERE (a.date IS NULL OR a.date = ?) 
+        AND (a.status IS NULL OR a.status = 0)
     ''', [currentDate.toIso8601String().split('T').first]);
     return Sqflite.firstIntValue(result) ?? 0;
   }
 
   Future<List<Member>> fetchPresentMembers(
-      {int limit = 5, int offset = 0, String name = ''}) async {
+      {int limit = 7, int offset = 0, String name = ''}) async {
     final currentDate = DateTime.now();
     final db = await dbHelper.database;
     final result = await db.rawQuery('''
@@ -55,7 +56,7 @@ class AttendanceRepository {
   }
 
   Future<List<Member>> fetchAbsentMembers(
-      {int limit = 5, int offset = 0, String name = ''}) async {
+      {int limit = 7, int offset = 0, String name = ''}) async {
     final currentDate = DateTime.now();
     final db = await dbHelper.database;
     final result = await db.rawQuery('''
