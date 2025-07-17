@@ -16,7 +16,13 @@ class MembersPage extends StatelessWidget {
     'green',
     'blue',
     'brown',
-    'black'
+    'black',
+    'light_blue',
+    'dark_blue',
+    'purple',
+    'light_brown',
+    'dark_brown',
+    'red'
   ];
 
   @override
@@ -98,22 +104,33 @@ class MembersPage extends StatelessWidget {
                             () {
                               switch (color) {
                                 case 'white':
-                                  return 'Bela';
+                                  return 'Beli';
                                 case 'yellow':
-                                  return 'Žuta';
+                                  return 'Žuti';
                                 case 'orange':
-                                  return 'Narandžasta';
+                                  return 'Narandžasti';
+                                case 'red':
+                                  return 'Crveni';
                                 case 'green':
-                                  return 'Zelena';
+                                  return 'Zeleni';
                                 case 'blue':
-                                  return 'Plava';
+                                  return 'Plavi';
                                 case 'brown':
                                   return 'Braon';
+                                case 'light_blue':
+                                  return 'Svetlo plavi';
+                                case 'dark_blue':
+                                  return 'Tamno plavi';
+                                case 'purple':
+                                  return 'Ljubičasti';
+                                case 'light_brown':
+                                  return 'Svetlo braon';
+                                case 'dark_brown':
+                                  return 'Tamno braon';
                                 case 'black':
                                   return 'Crni';
                                 default:
-                                  return color[0].toUpperCase() +
-                                      color.substring(1);
+                                  return '';
                               }
                             }(),
                           ),
@@ -217,18 +234,26 @@ class _MembersListState extends State<MembersList> {
 
   Color _getBeltColor(String beltColor) {
     switch (beltColor.toLowerCase()) {
-      case 'black':
-        return Colors.black;
-      case 'brown':
-        return Colors.brown;
-      case 'blue':
-        return Colors.blue;
-      case 'green':
-        return Colors.green;
-      case 'orange':
-        return Colors.orange;
       case 'yellow':
-        return Colors.yellow;
+        return const Color(0xFFFFEB3B); // Žuti
+      case 'orange':
+        return const Color(0xFFFF9800); // Narandžasti
+      case 'red':
+        return const Color(0xFFF44336); // Crveni
+      case 'green':
+        return const Color(0xFF4CAF50); // Zeleni
+      case 'light_blue':
+        return const Color(0xFF81D4FA); // Svetlo plavi
+      case 'dark_blue':
+        return const Color(0xFF1565C0); // Tamno plavi
+      case 'purple':
+        return const Color(0xFF9C27B0); // Ljubičasti
+      case 'light_brown':
+        return const Color(0xFFBCAAA4); // Svetlo braon
+      case 'dark_brown':
+        return const Color(0xFF5D4037); // Tamno braon
+      case 'black':
+        return Colors.black; // Crni
       case 'white':
         return Colors.grey;
       default:
@@ -238,22 +263,28 @@ class _MembersListState extends State<MembersList> {
 
   String _getBeltColorAsString(String beltColor) {
     switch (beltColor.toLowerCase()) {
-      case 'black':
-        return 'Crni pojas';
-      case 'brown':
-        return 'Braon pojas';
-      case 'blue':
-        return 'Plavi pojas';
-      case 'green':
-        return 'Zeleni pojas';
-      case 'orange':
-        return 'Narandžasti pojas';
       case 'yellow':
-        return 'Žuti pojas';
-      case 'white':
-        return 'Beli pojas';
+        return 'Žuti';
+      case 'orange':
+        return 'Narandžasti';
+      case 'red':
+        return 'Crveni';
+      case 'green':
+        return 'Zeleni';
+      case 'light_blue':
+        return 'Svetlo plavi';
+      case 'dark_blue':
+        return 'Tamno plavi';
+      case 'purple':
+        return 'Ljubičasti';
+      case 'light_brown':
+        return 'Svetlo braon';
+      case 'dark_brown':
+        return 'Tamno braon';
+      case 'black':
+        return 'Crni';
       default:
-        return beltColor[0].toUpperCase() + beltColor.substring(1);
+        return '';
     }
   }
 
@@ -436,18 +467,32 @@ class _MembersListState extends State<MembersList> {
 
 Color _getBeltColor(String beltColor) {
   switch (beltColor.toLowerCase()) {
-    case 'black':
-      return Colors.black;
-    case 'brown':
-      return Colors.brown;
+    case 'white':
+      return Colors.white; // Beli
     case 'blue':
-      return Colors.blue;
-    case 'green':
-      return Colors.green;
-    case 'orange':
-      return Colors.orange;
+      return const Color(0xFF2196F3); // Plavi
+    case 'brown':
+      return const Color(0xFF795548); // Braon
     case 'yellow':
-      return Colors.yellow;
+      return const Color(0xFFFFEB3B); // Žuti
+    case 'orange':
+      return const Color(0xFFFF9800); // Narandžasti
+    case 'red':
+      return const Color(0xFFF44336); // Crveni
+    case 'green':
+      return const Color(0xFF4CAF50); // Zeleni
+    case 'light_blue':
+      return const Color(0xFF81D4FA); // Svetlo plavi
+    case 'dark_blue':
+      return const Color(0xFF1565C0); // Tamno plavi
+    case 'purple':
+      return const Color(0xFF9C27B0); // Ljubičasti
+    case 'light_brown':
+      return const Color(0xFFBCAAA4); // Svetlo braon
+    case 'dark_brown':
+      return const Color(0xFF5D4037); // Tamno braon
+    case 'black':
+      return Colors.black; // Crni
     case 'white':
       return Colors.grey;
     default:
@@ -531,22 +576,33 @@ void _showEditMemberDialog(BuildContext context, Member member) {
                           label: Text(() {
                             switch (color) {
                               case 'white':
-                                return 'Bela';
+                                return 'Beli';
                               case 'yellow':
-                                return 'Žuta';
+                                return 'Žuti';
                               case 'orange':
-                                return 'Narandžasta';
+                                return 'Narandžasti';
+                              case 'red':
+                                return 'Crveni';
                               case 'green':
-                                return 'Zelena';
+                                return 'Zeleni';
                               case 'blue':
-                                return 'Plava';
+                                return 'Plavi';
                               case 'brown':
                                 return 'Braon';
+                              case 'light_blue':
+                                return 'Svetlo plavi';
+                              case 'dark_blue':
+                                return 'Tamno plavi';
+                              case 'purple':
+                                return 'Ljubičasti';
+                              case 'light_brown':
+                                return 'Svetlo braon';
+                              case 'dark_brown':
+                                return 'Tamno braon';
                               case 'black':
                                 return 'Crni';
                               default:
-                                return color[0].toUpperCase() +
-                                    color.substring(1);
+                                return '';
                             }
                           }()),
                           selected: beltController.text == color,
