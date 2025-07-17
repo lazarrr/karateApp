@@ -14,6 +14,23 @@ class TournamentsBloc extends Bloc<TournamentsEvent, TournamentsState> {
     on<GetTotalCountOfTournaments>(_onGetTotalCount);
     on<AddMembersToTournament>(_onAddMembersToTournament);
     on<GetMembersOfTournament>(_onGetMembersOfTournament);
+    on<RemoveMembersFromTournament>(_onRemoveMembersFromTournament);
+  }
+
+  /* ──────────────────────────────  remove members from tournament  ───────────────────────── */
+  Future<void> _onRemoveMembersFromTournament(
+    RemoveMembersFromTournament event,
+    Emitter<TournamentsState> emit,
+  ) async {
+    try {
+      await repository.removeMembersFromTournament(
+        event.tournamentId,
+        event.membersIds,
+      );
+      emit(MembersAddedToTournament());
+    } catch (e) {
+      emit(TournamentsError('Failed to remove members from tournament'));
+    }
   }
 
   /* ──────────────────────────────  get members of tournament  ───────────────────────── */

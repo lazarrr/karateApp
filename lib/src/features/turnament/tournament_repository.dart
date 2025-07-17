@@ -76,6 +76,21 @@ class TournamentsRepository {
     await batch.commit(noResult: true);
   }
 
+  /// Remove members from a tournament
+  Future<void> removeMembersFromTournament(
+      int tournamentId, List<int> memberIds) async {
+    final db = await dbHelper.database;
+    final batch = db.batch();
+    for (final memberId in memberIds) {
+      batch.delete(
+        'tournament_participants',
+        where: 'tournament_id = ? AND member_id = ?',
+        whereArgs: [tournamentId, memberId],
+      );
+    }
+    await batch.commit(noResult: true);
+  }
+
   /// Get all member IDs of a tournament
   Future<List<Member>> getMembersOfTournament(int tournamentId) async {
     final db = await dbHelper.database;

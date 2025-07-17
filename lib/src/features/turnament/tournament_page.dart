@@ -262,11 +262,27 @@ class _TournamentsListState extends State<_TournamentsList> {
 
                         if (selectedMembers != null) {
                           // Do something with the selected members
-                          context.read<TournamentsBloc>().add(
-                                AddMembersToTournament(
-                                    selectedMembers.map((m) => m.id).toList(),
-                                    t.id),
-                              );
+                          // Determine which members were added or removed
+                          final previousIds =
+                              currentMembers.map((m) => m.id).toSet();
+                          final selectedIds =
+                              selectedMembers.map((m) => m.id).toSet();
+
+                          final addedIds =
+                              selectedIds.difference(previousIds).toList();
+                          final removedIds =
+                              previousIds.difference(selectedIds).toList();
+
+                          if (addedIds.isNotEmpty) {
+                            context.read<TournamentsBloc>().add(
+                                  AddMembersToTournament(addedIds, t.id),
+                                );
+                          }
+                          if (removedIds.isNotEmpty) {
+                            context.read<TournamentsBloc>().add(
+                                  RemoveMembersFromTournament(removedIds, t.id),
+                                );
+                          }
                         }
                       }
                     },

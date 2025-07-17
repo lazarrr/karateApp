@@ -42,14 +42,8 @@ class _AddMembersToTournamentPageState
           _totalUserCount = state.count;
         });
       } else if (state is MembersLoaded) {
-        // Filter out already selected members
-        final newMembers = state.members
-            .where((member) =>
-                !selectedMembers.any((selected) => selected.id == member.id))
-            .toList();
-
         setState(() {
-          availableMembers = newMembers;
+          availableMembers = state.members;
         });
       } else if (state is MembersError) {
         ScaffoldMessenger.of(context).showSnackBar(
