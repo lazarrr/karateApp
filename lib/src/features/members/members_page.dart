@@ -10,20 +10,44 @@ class MembersPage extends StatelessWidget {
   const MembersPage({super.key});
 
   static const beltColors = [
-    'white',
     'yellow',
     'orange',
-    'green',
-    'blue',
-    'brown',
-    'black',
+    'red'
+        'green',
     'light_blue',
     'dark_blue',
     'purple',
     'light_brown',
     'dark_brown',
-    'red'
+    'black',
   ];
+
+  String _getTranslatedColor(String color) {
+    switch (color.toLowerCase()) {
+      case 'yellow':
+        return 'Žuti';
+      case 'orange':
+        return 'Narandžasti';
+      case 'red':
+        return 'Crveni';
+      case 'green':
+        return 'Zeleni';
+      case 'light_blue':
+        return 'Svetlo plavi';
+      case 'dark_blue':
+        return 'Tamno plavi';
+      case 'purple':
+        return 'Ljubičasti';
+      case 'light_brown':
+        return 'Svetlo braon';
+      case 'dark_brown':
+        return 'Tamno braon';
+      case 'black':
+        return 'Crni';
+      default:
+        return '';
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -98,58 +122,49 @@ class MembersPage extends StatelessWidget {
                   Wrap(
                     spacing: 8,
                     children: [
-                      for (final color in beltColors)
-                        ChoiceChip(
-                          label: Text(
-                            () {
-                              switch (color) {
-                                case 'white':
-                                  return 'Beli';
-                                case 'yellow':
-                                  return 'Žuti';
-                                case 'orange':
-                                  return 'Narandžasti';
-                                case 'red':
-                                  return 'Crveni';
-                                case 'green':
-                                  return 'Zeleni';
-                                case 'blue':
-                                  return 'Plavi';
-                                case 'brown':
-                                  return 'Braon';
-                                case 'light_blue':
-                                  return 'Svetlo plavi';
-                                case 'dark_blue':
-                                  return 'Tamno plavi';
-                                case 'purple':
-                                  return 'Ljubičasti';
-                                case 'light_brown':
-                                  return 'Svetlo braon';
-                                case 'dark_brown':
-                                  return 'Tamno braon';
-                                case 'black':
-                                  return 'Crni';
-                                default:
-                                  return '';
-                              }
-                            }(),
-                          ),
-                          selected: beltController.text == color,
-                          selectedColor: _getBeltColor(color).withOpacity(0.7),
-                          backgroundColor: Colors.grey[200],
-                          labelStyle: TextStyle(
-                            color: beltController.text == color
-                                ? Colors.white
-                                : Colors.black,
-                          ),
-                          onSelected: (selected) {
-                            if (selected) {
-                              beltController.text = color;
-                              // Force rebuild to update selection
-                              (context as Element).markNeedsBuild();
-                            }
-                          },
-                        ),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: beltColors
+                            .map((color) => GestureDetector(
+                                  onTap: () {
+                                    beltController.text = color;
+                                    (context as Element).markNeedsBuild();
+                                  },
+                                  child: Container(
+                                    width: 40,
+                                    height: 40,
+                                    decoration: BoxDecoration(
+                                      color: _getBeltColor(color),
+                                      shape: BoxShape.circle,
+                                      border: beltController.text == color
+                                          ? Border.all(
+                                              width: 3, color: Colors.white)
+                                          : null,
+                                      boxShadow: beltController.text == color
+                                          ? [
+                                              const BoxShadow(
+                                                  color: Colors.black38,
+                                                  blurRadius: 4)
+                                            ]
+                                          : null,
+                                    ),
+                                    child: beltController.text == color
+                                        ? Center(
+                                            child: Text(
+                                              _getTranslatedColor(
+                                                  color)[0], // First letter
+                                              style: const TextStyle(
+                                                color: Colors.white,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          )
+                                        : null,
+                                  ),
+                                ))
+                            .toList(),
+                      )
                     ],
                   ),
                 ],
@@ -507,14 +522,44 @@ void _showEditMemberDialog(BuildContext context, Member member) {
   final mailController = TextEditingController(text: member.email);
 
   const beltColors = [
-    'white',
-    'yellow',
-    'orange',
-    'green',
-    'blue',
-    'brown',
-    'black'
+    'yellow', // Žuti
+    'orange', // Narandžasti
+    'red', // Crveni
+    'green', // Zeleni
+    'light_blue', // Svetlo plavi
+    'dark_blue', // Tamno plavi
+    'purple', // Ljubičasti
+    'light_brown', // Svetlo braon
+    'dark_brown', // Tamno braon
+    'black' // Crni
   ];
+
+  String _getTranslatedColor(String color) {
+    switch (color.toLowerCase()) {
+      case 'yellow':
+        return 'Žuti';
+      case 'orange':
+        return 'Narandžasti';
+      case 'red':
+        return 'Crveni';
+      case 'green':
+        return 'Zeleni';
+      case 'light_blue':
+        return 'Svetlo plavi';
+      case 'dark_blue':
+        return 'Tamno plavi';
+      case 'purple':
+        return 'Ljubičasti';
+      case 'light_brown':
+        return 'Svetlo braon';
+      case 'dark_brown':
+        return 'Tamno braon';
+      case 'black':
+        return 'Crni';
+      default:
+        return '';
+    }
+  }
 
   showDialog(
     context: context,
@@ -569,56 +614,49 @@ void _showEditMemberDialog(BuildContext context, Member member) {
                   Wrap(
                     spacing: 8,
                     children: [
-                      for (final color in beltColors)
-                        ChoiceChip(
-                          label: Text(() {
-                            switch (color) {
-                              case 'white':
-                                return 'Beli';
-                              case 'yellow':
-                                return 'Žuti';
-                              case 'orange':
-                                return 'Narandžasti';
-                              case 'red':
-                                return 'Crveni';
-                              case 'green':
-                                return 'Zeleni';
-                              case 'blue':
-                                return 'Plavi';
-                              case 'brown':
-                                return 'Braon';
-                              case 'light_blue':
-                                return 'Svetlo plavi';
-                              case 'dark_blue':
-                                return 'Tamno plavi';
-                              case 'purple':
-                                return 'Ljubičasti';
-                              case 'light_brown':
-                                return 'Svetlo braon';
-                              case 'dark_brown':
-                                return 'Tamno braon';
-                              case 'black':
-                                return 'Crni';
-                              default:
-                                return '';
-                            }
-                          }()),
-                          selected: beltController.text == color,
-                          selectedColor: _getBeltColor(color).withOpacity(0.7),
-                          backgroundColor: Colors.grey[200],
-                          labelStyle: TextStyle(
-                            color: beltController.text == color
-                                ? Colors.white
-                                : Colors.black,
-                          ),
-                          onSelected: (selected) {
-                            if (selected) {
-                              beltController.text = color;
-                              // Force rebuild to update selection
-                              (context as Element).markNeedsBuild();
-                            }
-                          },
-                        ),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: beltColors
+                            .map((color) => GestureDetector(
+                                  onTap: () {
+                                    beltController.text = color;
+                                    (context as Element).markNeedsBuild();
+                                  },
+                                  child: Container(
+                                    width: 40,
+                                    height: 40,
+                                    decoration: BoxDecoration(
+                                      color: _getBeltColor(color),
+                                      shape: BoxShape.circle,
+                                      border: beltController.text == color
+                                          ? Border.all(
+                                              width: 3, color: Colors.white)
+                                          : null,
+                                      boxShadow: beltController.text == color
+                                          ? [
+                                              const BoxShadow(
+                                                  color: Colors.black38,
+                                                  blurRadius: 4)
+                                            ]
+                                          : null,
+                                    ),
+                                    child: beltController.text == color
+                                        ? Center(
+                                            child: Text(
+                                              _getTranslatedColor(
+                                                  color)[0], // First letter
+                                              style: const TextStyle(
+                                                color: Colors.white,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          )
+                                        : null,
+                                  ),
+                                ))
+                            .toList(),
+                      )
                     ],
                   ),
                 ],
