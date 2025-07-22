@@ -12,6 +12,31 @@ class MembersBloc extends Bloc<MembersEvent, MembersState> {
     on<UpdateMember>(_onUpdateMember);
     on<DeleteMember>(_onDeleteMember);
     on<GetTotalCountOfMembers>(getTotalCountOfMembers);
+    on<AddPayment>(_onAddPayment);
+    on<ReadAllPayments>(_onReadAllPayments);
+  }
+
+  Future<void> _onReadAllPayments(
+    ReadAllPayments event,
+    Emitter<MembersState> emit,
+  ) async {
+    try {
+      final payments = await repository.getPaymentsForMember(event.memberId);
+      emit(PaymentsLoaded(payments));
+    } catch (e) {
+      emit(MembersError('Failed to load payments'));
+    }
+  }
+
+  Future<void> _onAddPayment(
+    AddPayment event,
+    Emitter<MembersState> emit,
+  ) async {
+    try {
+      await repository.addPayment(event.memberId, event.month);
+    } catch (e) {
+      emit(MembersError('Failed to add payment'));
+    }
   }
 
   Future<void> getTotalCountOfMembers(

@@ -70,4 +70,23 @@ class MemberRepository {
     );
     return Sqflite.firstIntValue(result) ?? 0;
   }
+
+  Future<void> addPayment(int memberId, int month) async {
+    final db = await dbHelper.database;
+    await db.insert(
+      'payments',
+      {'member_id': memberId, 'month': month},
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  Future<List<int>> getPaymentsForMember(int memberId) async {
+    final db = await dbHelper.database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'payments',
+      where: 'member_id = ?',
+      whereArgs: [memberId],
+    );
+    return maps.map((map) => map['month'] as int).toList();
+  }
 }

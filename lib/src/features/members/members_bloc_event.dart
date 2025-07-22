@@ -10,6 +10,19 @@ class LoadMembers extends MembersEvent {
   LoadMembers({this.offset = 0, this.limit = 5, this.name = ''});
 }
 
+class ReadAllPayments extends MembersEvent {
+  final int memberId;
+
+  ReadAllPayments(this.memberId);
+}
+
+class AddPayment extends MembersEvent {
+  final int memberId;
+  final int month;
+
+  AddPayment(this.memberId, this.month);
+}
+
 class GetTotalCountOfMembers extends MembersEvent {}
 
 class AddMember extends MembersEvent {

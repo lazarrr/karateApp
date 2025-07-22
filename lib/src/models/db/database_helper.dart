@@ -51,9 +51,7 @@ class DatabaseHelper {
       CREATE TABLE payments (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         member_id INTEGER NOT NULL,
-        amount REAL NOT NULL,
-        date TEXT NOT NULL,
-        notes TEXT,
+        month int NOT NULL,
         FOREIGN KEY (member_id) REFERENCES members (id) ON DELETE CASCADE
       )
     ''');

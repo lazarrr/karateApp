@@ -1,9 +1,12 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:karate_club_app/src/features/members/members_bloc.dart';
 import 'package:karate_club_app/src/features/members/members_bloc_event.dart';
 import 'package:karate_club_app/src/features/members/members_bloc_state.dart';
 import 'package:karate_club_app/src/features/members/widgets/attendance_calendar.dart';
+import 'package:karate_club_app/src/features/members/widgets/payments.dart';
 import 'package:karate_club_app/src/models/member.dart';
 
 class MembersPage extends StatelessWidget {
@@ -12,8 +15,8 @@ class MembersPage extends StatelessWidget {
   static const beltColors = [
     'yellow',
     'orange',
-    'red'
-        'green',
+    'red',
+    'green',
     'light_blue',
     'dark_blue',
     'purple',
@@ -333,7 +336,6 @@ class _MembersListState extends State<MembersList> {
                   margin:
                       const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   child: ListTile(
-                    // Replace CircleAvatar with a colored belt strip
                     leading: Container(
                       width: 32,
                       height: 32,
@@ -380,6 +382,16 @@ class _MembersListState extends State<MembersList> {
                               Icon(Icons.calendar_month, color: Colors.green),
                               SizedBox(width: 8),
                               Text('Pregled dolaska'),
+                            ],
+                          ),
+                        ),
+                        const PopupMenuItem(
+                          value: 3,
+                          child: Row(
+                            children: [
+                              Icon(Icons.payment, color: Colors.blue),
+                              SizedBox(width: 8),
+                              Text('Clanarina'),
                             ],
                           ),
                         )
@@ -433,6 +445,8 @@ class _MembersListState extends State<MembersList> {
                               ],
                             ),
                           );
+                        } else if (value == 3) {
+                          showMonthPickerDialog(context, members[index].id);
                         }
                       },
                     ),

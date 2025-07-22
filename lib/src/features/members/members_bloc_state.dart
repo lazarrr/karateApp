@@ -22,6 +22,11 @@ class TotalCountOfMembers extends MembersState {
   TotalCountOfMembers(this.count) : super([]);
 }
 
+class PaymentsLoaded extends MembersState {
+  final List<int> payments;
+  PaymentsLoaded(this.payments) : super([]);
+}
+
 class MembersError extends MembersState {
   final String message;
   MembersError(this.message) : super([]);
